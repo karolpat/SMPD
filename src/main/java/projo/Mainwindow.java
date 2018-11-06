@@ -10,7 +10,7 @@ public class Mainwindow {
 
 	void go() {
 
-		database.load("C:\\Users\\Karol Patecki\\Downloads\\SMPD\\SMPD\\Maple_Oak.txt");
+		database.load("C:\\dev\\test.txt");
 
 		System.out.println("Enter number");
 		int dimension;
@@ -36,40 +36,47 @@ public class Mainwindow {
 			int max_ind = -1;
 			
 
-			Map<String, Double> classAverages = new HashMap<String, Double>();
-			classAverages.put(database.getClassNames().get(0), 0.0);
-			classAverages.put(database.getClassNames().get(1), 0.0);
-			Map<String, Double> classStds = new HashMap<String, Double>();
-			classStds.put(database.getClassNames().get(0), 0.0);
-			classStds.put(database.getClassNames().get(1), 0.0);
+//			Map<String, Double> classAverages = new HashMap<String, Double>();
+//			classAverages.put(database.getClassNames().get(0), 0.0);
+//			classAverages.put(database.getClassNames().get(1), 0.0);
+//			Map<String, Double> classStds = new HashMap<String, Double>();
+//			classStds.put(database.getClassNames().get(0), 0.0);
+//			classStds.put(database.getClassNames().get(1), 0.0);
 
-			for (int i = 0; i < database.getNoFeatures(); i++) {
+			Map<String, Double> classAverages = new HashMap<String, Double>();
+			Map<String, Double> classStds = new HashMap<String, Double>();
+			
+			for (int i = 0; i < database.getNoFeatures()-1; i++) {
 				System.out.println("+++++++++++++++++++++++++++++++");
 				System.out.println(i);
 				System.out.println("+++++++++++++++++++++++++++++++");
 
+//				Map<String, Double> classAverages = new HashMap<String, Double>();
+//				Map<String, Double> classStds = new HashMap<String, Double>();
 
 				for (Object ob : database.getObjects()) {
-
-//					if (!classAverages.containsKey(ob.getClassName())) {
-//						classAverages.put(ob.getClassName(), 0F);
-//					}
+					
+					
+					if (!classAverages.containsKey(ob.getClassName())) {
+						System.out.println("brak klucza "+ ob.getClassName());
+						classAverages.put(ob.getClassName(), 0.0);
+					}
 //
-//					if (!classStds.containsKey(ob.getClassName())) {
-//						classStds.put(ob.getClassName(), 0F);
-//					}
+					if (!classStds.containsKey(ob.getClassName())) {
+						classStds.put(ob.getClassName(), 0.0);
+					}
 
 					classAverages.put(ob.getClassName(), classAverages.get(ob.getClassName()) + ob.getFetures().get(i));
 					classStds.put(ob.getClassName(),
 							(classStds.get(ob.getClassName()) + Math.pow(ob.getFetures().get(i), 2)));
-					System.out.println(Math.pow(ob.getFetures().get(i), 2) + " pow");
-					System.out.println(ob.getClassName() + " name, stds " + classStds.get(ob.getClassName()));
 				}
 
 				for (Map.Entry<String, Integer> entry : database.getClassCounter().entrySet()) {
+					String key = entry.getKey();
+					int value = entry.getValue();
 					classAverages.put(entry.getKey(), classAverages.get(entry.getKey()) / entry.getValue());
-					classStds.put(entry.getKey(), Math.sqrt(classStds.get(entry.getKey()) / entry.getValue()
-							- Math.pow(classAverages.get(entry.getKey()), 2)));
+					classStds.put(key, Math.sqrt((classStds.get(key) / value
+							- (classAverages.get(key)*classAverages.get(key)))));
 //					System.out.println(classAverages.get(entry.getKey()) + " v,avg,k: " + entry.getKey());
 //					System.out.println(classStds.get(entry.getKey()) + " v,stds,k: " + entry.getKey());
 				}
@@ -77,10 +84,16 @@ public class Mainwindow {
 //				System.out.println(classAverages.get(database.getClassNames().get(1))+" avg, 1");
 //				System.out.println(classStds.get(database.getClassNames().get(0))+" stds, 0");
 //				System.out.println(classStds.get(database.getClassNames().get(1))+" stds, 1");
-				temp = Math.abs(classAverages.get(database.getClassNames().get(0))
+				temp = (classAverages.get(database.getClassNames().get(0))
 						- classAverages.get(database.getClassNames().get(1))
 								/ (classStds.get(database.getClassNames().get(0))
 										+ classStds.get(database.getClassNames().get(1))));
+				System.out.println(classAverages.get(database.getClassNames().get(0))+ " get0 AVG "+database.getClassNames().get(0));
+				System.out.println(classAverages.get(database.getClassNames().get(1))+ " get1 AVG "+database.getClassNames().get(1));
+				System.out.println("max ind= " + max_ind);
+				System.out.println("FLD= " + FLD);
+				System.out.println("temp= "+temp);
+				
 				if (temp > FLD) {
 					FLD = temp;
 					max_ind = i;
