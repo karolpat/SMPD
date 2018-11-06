@@ -38,7 +38,10 @@ public class Database {
 		} else if (object.getClassName() == null) {
 			return false;
 		}
-
+//		System.out.println(object.getClassName()+" name");
+//		for(Float f:object.getFetures()) {
+//			System.out.println(f);
+//		}
 		objects.add(object);
 		++noObjects;
 		
