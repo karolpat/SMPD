@@ -160,5 +160,13 @@ public class Database {
 	public int getNoFeatures() {
 		return noFeatures;
 	}
+	
+	public Map<String, Integer> getClassCounter(){
+		return classCounter;
+	}
+	
+	public ArrayList<String> getClassNames(){
+		return classNamesList;
+	}
 
 }

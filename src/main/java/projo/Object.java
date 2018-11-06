@@ -4,13 +4,11 @@ import java.util.ArrayList;
 
 public class Object {
 	
-	private int classID;
 	private String className;
 	private ArrayList<Float> features;
 	
 	public Object(String className, ArrayList<Float> features) {
 		
-//		this.classID=-1;
 		this.className=className;
 		this.features=features;
 		
@@ -28,98 +26,86 @@ public class Object {
 		return this.features.size();
 	}
 
-	int setClassID(int ID) {
-		return this.classID=ID;
-	}
-	
-//	bool Database::load(const std::string &fileName)
-//	{
-//	    clear();
-//
-//	    std::ifstream file(fileName);
-//
-//	    if (!file.is_open())
-//	    {
-//	        return false;
-//	    }
-//	    std::string line; getline(file, line);
-//
-//	    size_t pos = line.find_first_of(',');
-//	    if (pos == std::string::npos)
-//	        return false;
-//	    unsigned int classFeaturesNo = std::stoi(line.substr(0, pos));
-//
-//	    std::string featuresID = line.substr(pos + 1);
-//
-//	    while (true)
-//	    {
-//	        pos = featuresID.find_first_of(',');
-//	        if (pos != std::string::npos)
-//	        {
-//	            std::string feature = featuresID.substr(0, pos);
-//	            featuresID = featuresID.substr(pos + 1);
-//	            unsigned int featureID = std::stof(feature);
-//	            featuresIDs.push_back(featureID);
-//	        }
-//	        else
-//	        {
-//	            unsigned int featureID = std::stof(featuresID);
-//	            featuresIDs.push_back(featureID);
-//	            break;
-//	        }
-//	    }
-//
-//	    for (std::string line; getline(file, line);)
-//	    {
-//	        size_t pos = line.find_first_of(',');
-//	        if (pos == std::string::npos)
-//	        {
-//	            // logowanie b³êdu przy odczycie z pliku
-//	          continue;
-//	        }
-//
-//	        std::string className = line.substr(0, pos);
-//
-//	        size_t classNamePos = className.find_first_of(' ');
-//	        if (classNamePos != std::string::npos)
-//	            className = className.substr(0, classNamePos);
-//
-//	        std::string features = line.substr(pos+1);
-//
-//	        std::vector<float> featuresValues;
-//
-//	        while (true)
-//	        {
-//
-//	            pos = features.find_first_of(',');
-//	            if (pos != std::string::npos)
-//	            {
-//	                std::string feature = features.substr(0, pos);
-//	                features = features.substr(pos + 1);
-//	                float featureValue = std::stof(feature);
-//	                featuresValues.push_back(featureValue);
-//	            }
-//	            else
-//	            {
-//	                float featureValue = std::stof(features);
-//	                featuresValues.push_back(featureValue);
-//	                break;
-//	            }
-//	        }
-//
-//	        if(classFeaturesNo == featuresValues.size())
-//	        {
-//	            if(addObject(Object(className, featuresValues)))
-//	            {
-//	                // logowanie b³êdu przy dodawaniu obiektu do bazy
-//	            }
-//	        }
-//	        else return false;
-//
-//	    }
-//	    file.close(); // logowanie poprawnego wczytania do bazy
-//	    return true;
-//	}
-
-
 }
+
+//void MainWindow::on_FSpushButtonCompute_clicked()
+//{
+//    int dimension = ui->FScomboBox->currentText().toInt();
+//
+//
+//    if( ui->FSradioButtonFisher ->isChecked())
+//    {
+//    if (dimension == 1 && database.getNoClass() == 2)
+//        {
+//            float FLD = 0, tmp;
+//            int max_ind = -1;
+//
+//            //std::map<std::string, int> classNames = database.getClassNames();
+//            for (uint i = 0; i < database.getNoFeatures(); ++i)
+//            {
+//                std::map<std::string, float> classAverages;
+//                std::map<std::string, float> classStds;
+//
+//                for (auto const &ob : database.getObjects())
+//                {
+//                    classAverages[ob.getClassName()] += ob.getFeatures()[i];
+//                    classStds[ob.getClassName()] += ob.getFeatures()[i] * ob.getFeatures()[i];
+//                }
+//
+//                std::for_each(database.getClassCounters().begin(), database.getClassCounters().end(), [&](const std::pair<std::string, int> &it)
+//                {
+//                    classAverages[it.first] /= it.second;
+//                    classStds[it.first] = std::sqrt(classStds[it.first] / it.second - classAverages[it.first] * classAverages[it.first]);
+//                }
+//                );
+//
+//                tmp = std::abs(classAverages[ database.getClassNames()[0] ] - classAverages[database.getClassNames()[1]]) / (classStds[database.getClassNames()[0]] + classStds[database.getClassNames()[1]]);
+//
+//                if (tmp > FLD)
+//                {
+//                    FLD = tmp;
+//                    max_ind = i;
+//                }
+//
+//              }
+//
+//            ui->FStextBrowserDatabaseInfo->append("max_ind: "  +  QString::number(max_ind) + " " + QString::number(FLD));
+//
+//        }
+//        else if(dimension > 1 && database.getNoClass() == 2)
+//        {
+//            std::vector<float> features;
+//            std::vector<Object> objects = database.getObjects();
+//            auto matrix = new float[dimension][8];
+//            int row=0;
+//            int col=0;
+//
+//            std::vector<Object>::iterator objIt;
+//            std::vector<float>::iterator feaIt;
+//
+//            for(objIt = objects.begin(); objIt != objects.end(); ++objIt) {
+//                Object obj = *objIt;
+//                features = obj.getFeatures();
+//                col++;
+//                row=0;
+//
+//                while(row < dimension){
+//
+//                    for(feaIt = features.begin(); feaIt != features.end(); ++feaIt){
+//                        matrix[row][col] = *feaIt;
+//                        QTextStream(stdout) << matrix[row][col];
+//                        row++;
+//
+//                    }
+//                }
+                /*for(int i=0; i<dimension; i++){
+                    for(int j=0; j<8; j++){
+                        QTextStream(stdout) << matrix[i][j] << " + " << i << ", " << j;
+                        QTextStream(stdout) << " " << endl;
+                    }
+                }*/
+
+//            }
+//
+//        }
+//     }
