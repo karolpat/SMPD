@@ -12,9 +12,12 @@ import java.util.Scanner;
 public class Database {
 
 	private ArrayList<Object> objects = new ArrayList<Object>();
-	private Map<String, Integer> classCounter=new HashMap<String,Integer>();
+	private Map<String, Integer> classCounter = new HashMap<String, Integer>();
 	private ArrayList<String> classNamesList = new ArrayList<String>();
 	private ArrayList<Integer> featuresIDs = new ArrayList<Integer>();
+
+	private Float[][] firstClassArray;
+	private Float[][] secondClassArray;
 
 	private int noClass = 0;
 	private int noObjects = 0;
@@ -26,9 +29,44 @@ public class Database {
 		this.noFeatures = noFeatures;
 	}
 
-	boolean addObject(Object object) {
+	void getArrays() {
+
+		int index = 0;
+		String firstClass = null;
+		String secondClass = null;
+		for (Map.Entry<String, Integer> entry : classCounter.entrySet()) {
+			if (index == 0) {
+				firstClassArray = new Float[featuresIDs.size()][entry.getValue()];
+				index++;
+				firstClass = entry.getKey();
+			} else {
+				secondClassArray = new Float[featuresIDs.size()][entry.getValue()];
+				secondClass = entry.getKey();
+			}
+		}
 		
-		int counter=0;
+		int firstIndex = 0;
+		int secondIndex = 0;
+//		boolean secondArr=false;
+		
+		for (int i = 0; i < featuresIDs.size(); i++) {
+			firstIndex=0;
+			secondIndex=0;
+//			if(secondArr) secondIndex++;
+			for (Object ob : objects) {
+				if (ob.getClassName().equals(firstClass)) {
+					firstClassArray[i][firstIndex++] = ob.getFetures().get(i);
+				} else if (ob.getClassName().equals(secondClass)) {
+					secondClassArray[i][secondIndex++] = ob.getFetures().get(i);
+//					secondArr=true;
+				}
+			}
+		}
+	}
+
+	boolean addObject(Object object) {
+
+		int counter = 0;
 		String className = object.getClassName();
 
 		if (noFeatures == 0) {
@@ -40,17 +78,17 @@ public class Database {
 		}
 //		System.out.println(object.getClassName()+" name");
 //		for(Float f:object.getFetures()) {
-//			System.out.println(f);
+//			System.out.print(f+" ");
 //		}
 		objects.add(object);
 		++noObjects;
-		
-		if(classCounter.get(className)==null) {
-			counter=1;
+
+		if (classCounter.get(className) == null) {
+			counter = 1;
 			classCounter.put(className, counter);
 			classNamesList.add(className);
-		}else {
-			classCounter.put(className, classCounter.get(className)+1);
+		} else {
+			classCounter.put(className, classCounter.get(className) + 1);
 		}
 //		System.out.println(classCounter.get("Acer")+" acer");
 //		System.out.println(classCounter.get("Quercus")+" quer");
@@ -103,7 +141,7 @@ public class Database {
 
 				className = nextLine.get(0);
 
-				featuresValues.clear();
+				featuresValues = new ArrayList<Float>();
 				nextLine = Arrays.asList(currentLine.split(","));
 
 				for (int i = 1; i < nextLine.size(); i++) {
@@ -115,10 +153,11 @@ public class Database {
 //				}
 
 				if (checkFeaturesNumber(featuresValues.size(), classFeaturesNo)) {
-					if (!addObject(new Object(className,featuresValues))) {
+					if (!addObject(new Object(className, featuresValues))) {
 						System.out.println("Error log");
 					}
 				}
+
 			}
 
 			sc.close();
@@ -127,6 +166,7 @@ public class Database {
 			e.printStackTrace();
 			return false;
 		}
+		getArrays();
 		return true;
 	}
 
@@ -147,9 +187,9 @@ public class Database {
 		}
 		return true;
 	}
-	
-	public ArrayList<Object> getObjects(){
-	    return objects;
+
+	public ArrayList<Object> getObjects() {
+		return objects;
 	}
 
 	public int getNoClass() {
@@ -163,13 +203,21 @@ public class Database {
 	public int getNoFeatures() {
 		return noFeatures;
 	}
-	
-	public Map<String, Integer> getClassCounter(){
+
+	public Map<String, Integer> getClassCounter() {
 		return classCounter;
 	}
-	
-	public ArrayList<String> getClassNames(){
+
+	public ArrayList<String> getClassNames() {
 		return classNamesList;
+	}
+
+	public Float[][] getFirstClassArray() {
+		return firstClassArray;
+	}
+
+	public Float[][] getSecondClassArray() {
+		return secondClassArray;
 	}
 
 }

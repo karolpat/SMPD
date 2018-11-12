@@ -29,88 +29,73 @@ public class Mainwindow {
 		System.out.println(dimension + " dim");
 		System.out.println(database.getNoClass() + " noclass");
 
-		if (dimension == 1 && database.getNoClass() == 2) {
+		Float[][] firstClassArray = database.getFirstClassArray();
+		Float[][] secondClassArray = database.getSecondClassArray();
 
+		if (dimension == 1 && database.getNoClass() == 2) {
+			//
 			float FLD = 0;
 			float temp;
 			int max_ind = -1;
-			
 
-//			Map<String, Double> classAverages = new HashMap<String, Double>();
-//			classAverages.put(database.getClassNames().get(0), 0.0);
-//			classAverages.put(database.getClassNames().get(1), 0.0);
-//			Map<String, Double> classStds = new HashMap<String, Double>();
-//			classStds.put(database.getClassNames().get(0), 0.0);
-//			classStds.put(database.getClassNames().get(1), 0.0);
+			Map<Integer, Float> featureAvgFirstClass = new HashMap<Integer, Float>();
+			Map<Integer, Float> featureAvgSecondClass = new HashMap<Integer, Float>();
 
-			Map<String, Float> classAverages = new HashMap<String, Float>();
-			Map<String, Float> classStds = new HashMap<String, Float>();
-			
+			float firstAverage = 0;
+			float secondAverage = 0;
+
+			for (int i = 0; i < firstClassArray.length; i++) {
+				firstAverage = 0;
+				secondAverage = 0;
+				for (Float f : firstClassArray[i]) {
+					firstAverage += f;
+				}
+				firstAverage = firstAverage / firstClassArray[i].length;
+				featureAvgFirstClass.put(i, firstAverage);
+
+				for (Float f : secondClassArray[i]) {
+					secondAverage += f;
+				}
+				secondAverage = secondAverage / secondClassArray[i].length;
+				featureAvgSecondClass.put(i, secondAverage);
+			}
+
+			Map<Integer, Float> featureStdsFirstClass = new HashMap<Integer, Float>();
+			Map<Integer, Float> featureStdsSecondClass = new HashMap<Integer, Float>();
+
+			float firstStds = 0;
+			float secondStds = 0;
+
+			for (int i = 0; i < firstClassArray.length; i++) {
+				firstStds = 0;
+				secondStds = 0;
+				float temporary = 0;
+				for (Float f : firstClassArray[i]) {
+					temporary += Math.pow(f - featureAvgFirstClass.get(i), 2);
+				}
+				firstStds = (float) Math.sqrt(temporary / firstClassArray[i].length);
+				featureStdsFirstClass.put(i, firstStds);
+				temporary = 0;
+				for (Float f : secondClassArray[i]) {
+					temporary += Math.pow(f - featureAvgSecondClass.get(i), 2);
+				}
+				secondStds = (float) Math.sqrt(temporary / secondClassArray[i].length);
+				featureStdsSecondClass.put(i, secondStds);
+				System.out.println(featureStdsSecondClass.get(i));
+			}
+
 			for (int i = 0; i < database.getNoFeatures(); i++) {
-				System.out.println("+++++++++++++++++++++++++++++++");
-				System.out.println(i);
-				System.out.println("+++++++++++++++++++++++++++++++");
+				temp = Math.abs((featureAvgFirstClass.get(i) - featureAvgSecondClass.get(i))
+						/ (featureStdsFirstClass.get(i) + featureStdsSecondClass.get(i)));
 
-//				Map<String, Double> classAverages = new HashMap<String, Double>();
-//				Map<String, Double> classStds = new HashMap<String, Double>();
-
-				for (Object ob : database.getObjects()) {
-					
-//					System.out.println(ob.getClassName()+" name, v: "+ob.getFetures().get(i));
-					if (!classAverages.containsKey(ob.getClassName())) {
-//						System.out.println("brak klucza "+ ob.getClassName());
-						classAverages.put(ob.getClassName(), ob.getFetures().get(i));
-					}else {
-						classAverages.put(ob.getClassName(), classAverages.get(ob.getClassName()) + ob.getFetures().get(i));
-					}
-//
-					if (!classStds.containsKey(ob.getClassName())) {
-						classStds.put(ob.getClassName(), (float) Math.pow(ob.getFetures().get(i),2));
-					}else {
-						classStds.put(ob.getClassName(), classStds.get(ob.getClassName()) + (float) Math.pow(ob.getFetures().get(i),2));
-					}
-
-//					classAverages.put(ob.getClassName(), classAverages.get(ob.getClassName()) + ob.getFetures().get(i));
-//					classStds.put(ob.getClassName(),
-//							(float) (classStds.get(ob.getClassName()) + Math.pow(ob.getFetures().get(i), 2)));
-				}
-
-				for (Map.Entry<String, Integer> entry : database.getClassCounter().entrySet()) {
-					String key = entry.getKey();
-					int value = entry.getValue();
-					System.out.println(entry.getKey()+" k,v: "+entry.getValue());
-					classAverages.put(entry.getKey(), (classAverages.get(entry.getKey()) / entry.getValue()));
-					classStds.put(key, (float) Math.sqrt(Math.abs((classStds.get(key) / value
-							- (classAverages.get(key)*classAverages.get(key))))));
-//					System.out.println(classAverages.get(entry.getKey()) + " v,avg,k: " + entry.getKey());
-//					System.out.println(classStds.get(entry.getKey()) + " v,stds,k: " + entry.getKey());
-				}
-//				System.out.println(classAverages.get(database.getClassNames().get(0))+" avg, 0");
-//				System.out.println(classAverages.get(database.getClassNames().get(1))+" avg, 1");
-//				System.out.println(classStds.get(database.getClassNames().get(0))+" stds, 0");
-//				System.out.println(classStds.get(database.getClassNames().get(1))+" stds, 1");
-				temp = Math.abs((classAverages.get(database.getClassNames().get(0))
-						- classAverages.get(database.getClassNames().get(1)))
-								/ (classStds.get(database.getClassNames().get(0))
-										+ classStds.get(database.getClassNames().get(1))));
-				System.out.println(classAverages.get(database.getClassNames().get(0))+ " get0 AVG "+database.getClassNames().get(0));
-				System.out.println(classAverages.get(database.getClassNames().get(1))+ " get1 AVG "+database.getClassNames().get(1));
-				System.out.println(classStds.get(database.getClassNames().get(0))+ " get0 stds "+database.getClassNames().get(0));
-				System.out.println(classStds.get(database.getClassNames().get(1))+ " get1 stds "+database.getClassNames().get(1));
-				System.out.println("max ind= " + max_ind);
-				System.out.println("FLD= " + FLD);
-				System.out.println("temp= "+temp);
-				
 				if (temp > FLD) {
 					FLD = temp;
 					max_ind = i;
 				}
 			}
 
-			System.out.println("max ind= " + max_ind);
-			System.out.println("FLD= " + FLD);
+			System.out.println(FLD + " fld, ind: " + max_ind);
 		}
-
 	}
 
 }
