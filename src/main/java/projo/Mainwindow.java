@@ -1,10 +1,16 @@
 package projo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
+
+import org.apache.commons.math3.util.Combinations;
 
 import Jama.Matrix;
 
@@ -38,6 +44,13 @@ public class Mainwindow {
 				break;
 			}
 		}
+
+		Scanner sc1 = new Scanner(System.in);
+
+		System.out.println("0=discriminant; 1=sequential");
+		int variant = sc1.nextInt();
+		sc1.close();
+
 		System.out.println(dimension + " dim");
 		System.out.println(database.getNoClass() + " noclass");
 
@@ -46,7 +59,17 @@ public class Mainwindow {
 
 		getClassAverages(featureAvgFirstClass, featureAvgSecondClass);
 		getClassStds(featureStdsFirstClass, featureStdsSecondClass);
+		if (variant == 0) {
+			discriminantFisher(dimension);
+		} else if (variant == 1) {
+			sequentialFisher(dimension);
+		} else {
+			System.out.println("end");
+		}
 
+	}
+
+	private int[] discriminantFisher(int dimension) {
 		if (dimension == 1 && database.getNoClass() == 2) {
 			//
 			float FLD = 0;
@@ -62,52 +85,95 @@ public class Mainwindow {
 					max_ind = i;
 				}
 			}
-
 			System.out.println(FLD + " fld, ind: " + max_ind);
+			return null;
 
-		} else if (dimension > 1 && database.getNoClass() == 2) {
+		} else {
 
-			double[][] sFirstClassArray = new double[dimension][firstClassArray[0].length];
-			double[][] sSecondClassArray = new double[dimension][secondClassArray[0].length];
-			List<Double> vector = new ArrayList<Double>();
-			double vectorSum=0;
-			List<Integer> featuresList = new ArrayList<Integer>();
+			Combinations comb = new Combinations(database.getNoFeatures(), dimension);
+			Map<int[], Double> fishers = new ConcurrentHashMap<int[], Double>();
 
-			for (int i = 0; i < dimension; i++) {
+			for (int[] features : comb) {
+				double fisher = getFisher(features);
+				fishers.put(features, fisher);
+			}
+
+			int[] result = Collections.max(fishers.entrySet(), Map.Entry.comparingByValue()).getKey();
+			System.out.println(Arrays.toString(result) + " max");
+			return result;
+		}
+	}
+
+	private void sequentialFisher(int dimension) {
+
+		List<Integer> features = new ArrayList<>();
+		// Set<Integer> features = new HashSet<>();
+
+		for (int i = 0; i < database.getNoFeatures(); i++) {
+			int[] firstClassFisher = new int[firstClassArray[0].length];
+			double[] secondClassFisher = new double[secondClassArray[0].length];
+
+			for (int j = 0; j < firstClassArray[0].length; j++) {
+				if (i == j || features.contains(j)) {
+					firstClassFisher[j] = Integer.MIN_VALUE;
+				}
+				List<Integer> featureList = new ArrayList<>(features);
+				featureList.add(j);
+				
+				int[] featuresArray = featureList.stream().mapToInt(x -> x).toArray();
+				firstClassFisher = discriminantFisher(featuresArray);
+			}
+		}
+	}
+
+	private double getFisher(int[] comb) {
+
+		double[][] sFirstClassArray = new double[comb.length][firstClassArray[0].length];
+		double[][] sSecondClassArray = new double[comb.length][secondClassArray[0].length];
+		List<Double> vector = new ArrayList<Double>();
+		double vectorSum = 0;
+		List<Integer> featuresList = new ArrayList<Integer>();
+
+		int n = 0;
+		for (int i = 0; i < database.getNoFeatures(); i++) {
+			final int index = i;
+
+			if (IntStream.of(comb).anyMatch(x -> x == index)) {
+
 				for (int j = 0; j < firstClassArray[0].length; j++) {
 
-					sFirstClassArray[i][j] = firstClassArray[i][j] - featureAvgFirstClass.get(i);
+					sFirstClassArray[n][j] = firstClassArray[i][j] - featureAvgFirstClass.get(i);
 				}
 				for (int j = 0; j < secondClassArray[0].length; j++) {
 
-					sSecondClassArray[i][j] = secondClassArray[i][j] - featureAvgSecondClass.get(i);
+					sSecondClassArray[n][j] = secondClassArray[i][j] - featureAvgSecondClass.get(i);
 				}
-				vectorSum+=featureAvgFirstClass.get(i)-featureAvgSecondClass.get(i);
+				vectorSum += featureAvgFirstClass.get(i) - featureAvgSecondClass.get(i);
 				vector.add(vectorSum);
 				featuresList.add(i);
+				n++;
 			}
-			
-			
-			Matrix sFirstClassMtx = new Matrix(sFirstClassArray);
-			Matrix sFirstClassMulti = sFirstClassMtx.times(sFirstClassMtx.transpose());
-			
-			Matrix sSecondClassMtx = new Matrix(sSecondClassArray);
-			Matrix sSecondClassMulti = sSecondClassMtx.times(sSecondClassMtx.transpose());
-			
-			Matrix subtracted = sFirstClassMulti.minus(sSecondClassMulti);
-			
-			double det = subtracted.det();
-			
-			double numerator=0;
-			
-			for(Double d : vector) {
-				numerator+=Math.pow(d, 2);
-			}
-			double FLD = Math.sqrt(numerator)/det;
-			System.out.println(FLD);
-			System.out.println(featuresList.toString());
 		}
+
+		Matrix sFirstClassMtx = new Matrix(sFirstClassArray);
+		Matrix sFirstClassMulti = sFirstClassMtx.times(sFirstClassMtx.transpose());
+
+		Matrix sSecondClassMtx = new Matrix(sSecondClassArray);
+		Matrix sSecondClassMulti = sSecondClassMtx.times(sSecondClassMtx.transpose());
+
+		Matrix subtracted = sFirstClassMulti.minus(sSecondClassMulti);
+
+		double det = subtracted.det();
+
+		double numerator = 0;
+
+		for (Double d : vector) {
+			numerator += Math.pow(d, 2);
+		}
+		return Math.sqrt(numerator) / det;
+		// System.out.println(FLD);
 	}
+
 	private void getClassAverages(Map<Integer, Float> featureAvgFirstClass, Map<Integer, Float> featureAvgSecondClass) {
 
 		float firstAverage = 0;
