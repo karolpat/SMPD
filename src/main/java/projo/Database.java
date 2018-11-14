@@ -249,6 +249,7 @@ public class Database {
 	}
 
 	public List<Object> getSecondClassObjectList() {
+		splitObjectList();
 		return secondClassObjects;
 	}
 
