@@ -60,7 +60,11 @@ public class Mainwindow {
 		getClassAverages(featureAvgFirstClass, featureAvgSecondClass);
 		getClassStds(featureStdsFirstClass, featureStdsSecondClass);
 		if (variant == 0) {
-			discriminantFisher(dimension);
+			if (dimension == 1) {
+				getFisher();
+			} else {
+				discriminantFisher(dimension);
+			}
 		} else if (variant == 1) {
 			sequentialFisher(dimension);
 		} else {
@@ -69,64 +73,72 @@ public class Mainwindow {
 
 	}
 
-	private int[] discriminantFisher(int dimension) {
-		if (dimension == 1 && database.getNoClass() == 2) {
-			//
-			float FLD = 0;
-			float temp;
-			int max_ind = -1;
-
-			for (int i = 0; i < database.getNoFeatures(); i++) {
-				temp = Math.abs((featureAvgFirstClass.get(i) - featureAvgSecondClass.get(i))
-						/ (featureStdsFirstClass.get(i) + featureStdsSecondClass.get(i)));
-
-				if (temp > FLD) {
-					FLD = temp;
-					max_ind = i;
-				}
-			}
-			System.out.println(FLD + " fld, ind: " + max_ind);
-			return null;
-
-		} else {
-
-			Combinations comb = new Combinations(database.getNoFeatures(), dimension);
-			Map<int[], Double> fishers = new ConcurrentHashMap<int[], Double>();
-
-			for (int[] features : comb) {
-				double fisher = getFisher(features);
-				fishers.put(features, fisher);
-			}
-
-			int[] result = Collections.max(fishers.entrySet(), Map.Entry.comparingByValue()).getKey();
-			System.out.println(Arrays.toString(result) + " max");
-			return result;
-		}
-	}
-
-	private void sequentialFisher(int dimension) {
-
-		List<Integer> features = new ArrayList<>();
-		// Set<Integer> features = new HashSet<>();
+	private int getFisher() {
+		int[] bestFeature = new int[1];
+		double FLD = 0;
+		double temp;
+		int max_ind = -1;
 
 		for (int i = 0; i < database.getNoFeatures(); i++) {
-			int[] firstClassFisher = new int[firstClassArray[0].length];
-			double[] secondClassFisher = new double[secondClassArray[0].length];
+			temp = Math.abs((featureAvgFirstClass.get(i) - featureAvgSecondClass.get(i))
+					/ (featureStdsFirstClass.get(i) + featureStdsSecondClass.get(i)));
 
-			for (int j = 0; j < firstClassArray[0].length; j++) {
-				if (i == j || features.contains(j)) {
-					firstClassFisher[j] = Integer.MIN_VALUE;
-				}
-				List<Integer> featureList = new ArrayList<>(features);
-				featureList.add(j);
-				
-				int[] featuresArray = featureList.stream().mapToInt(x -> x).toArray();
-				firstClassFisher = discriminantFisher(featuresArray);
+			if (temp > FLD) {
+				FLD = temp;
+				max_ind = i;
 			}
 		}
+		bestFeature[0] = max_ind;
+		System.out.println("best: " + Arrays.toString(bestFeature) + "; " + FLD);
+		return max_ind;
 	}
 
-	private double getFisher(int[] comb) {
+	private int[] discriminantFisher(int dimension) {
+
+		Combinations comb = new Combinations(database.getNoFeatures(), dimension);
+		Map<int[], Double> fishers = new ConcurrentHashMap<int[], Double>();
+
+		for (int[] features : comb) {
+			double fisher = calculateFisher(features);
+			fishers.put(features, fisher);
+		}
+
+		int[] result = Collections.max(fishers.entrySet(), Map.Entry.comparingByValue()).getKey();
+		System.out.println(Arrays.toString(result) + " max");
+		return result;
+	}
+
+	private int[] sequentialFisher(int dimension) {
+
+		List<Integer> features = new ArrayList<>();
+		List<Integer> featureList;
+		// Set<Integer> features = new HashSet<>();
+		features.add(getFisher());
+
+		for (int i = 0; i < dimension - 1; i++) {
+			double[] consecutiveFeatures = new double[database.getNoFeatures()];
+
+			for (int j = 0; j < database.getNoFeatures(); j++) {
+				if (i == j || features.contains(j)) {
+					continue;
+				} else {
+					featureList = new ArrayList<>(features);
+					featureList.add(j);
+				}
+
+				int[] featuresArray = featureList.stream().mapToInt(x -> x).toArray();
+
+				consecutiveFeatures[j] = calculateFisher(featuresArray);
+			}
+			int bestFeatureIndex = getIndexOfLargest(consecutiveFeatures);
+			features.add(bestFeatureIndex);
+		}
+		int[] result = features.stream().mapToInt(x -> x).toArray();
+		System.out.println(Arrays.toString(result));
+		return result;
+	}
+
+	private double calculateFisher(int[] comb) {
 
 		double[][] sFirstClassArray = new double[comb.length][firstClassArray[0].length];
 		double[][] sSecondClassArray = new double[comb.length][secondClassArray[0].length];
@@ -217,6 +229,18 @@ public class Mainwindow {
 			secondStds = (float) Math.sqrt(temporary / secondClassArray[i].length);
 			featureStdsSecondClass.put(i, secondStds);
 		}
+	}
+
+	public int getIndexOfLargest(double[] array) {
+		if (array == null || array.length == 0)
+			return -1; // null or empty
+
+		int largest = 0;
+		for (int i = 1; i < array.length; i++) {
+			if (array[i] > array[largest])
+				largest = i;
+		}
+		return largest; // position of the first largest found
 	}
 
 }
