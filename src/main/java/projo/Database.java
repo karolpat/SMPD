@@ -16,6 +16,9 @@ public class Database {
 	private ArrayList<String> classNamesList = new ArrayList<String>();
 	private ArrayList<Integer> featuresIDs = new ArrayList<Integer>();
 
+	private List<Object> firstClassObjects = new ArrayList<Object>();
+	private List<Object> secondClassObjects = new ArrayList<Object>();
+
 	private Float[][] firstClassArray;
 	private Float[][] secondClassArray;
 
@@ -44,21 +47,21 @@ public class Database {
 				secondClass = entry.getKey();
 			}
 		}
-		
+
 		int firstIndex = 0;
 		int secondIndex = 0;
-//		boolean secondArr=false;
-		
+		// boolean secondArr=false;
+
 		for (int i = 0; i < featuresIDs.size(); i++) {
-			firstIndex=0;
-			secondIndex=0;
-//			if(secondArr) secondIndex++;
+			firstIndex = 0;
+			secondIndex = 0;
+			// if(secondArr) secondIndex++;
 			for (Object ob : objects) {
 				if (ob.getClassName().equals(firstClass)) {
 					firstClassArray[i][firstIndex++] = ob.getFetures().get(i);
 				} else if (ob.getClassName().equals(secondClass)) {
 					secondClassArray[i][secondIndex++] = ob.getFetures().get(i);
-//					secondArr=true;
+					// secondArr=true;
 				}
 			}
 		}
@@ -76,10 +79,10 @@ public class Database {
 		} else if (object.getClassName() == null) {
 			return false;
 		}
-//		System.out.println(object.getClassName()+" name");
-//		for(Float f:object.getFetures()) {
-//			System.out.print(f+" ");
-//		}
+		// System.out.println(object.getClassName()+" name");
+		// for(Float f:object.getFetures()) {
+		// System.out.print(f+" ");
+		// }
 		objects.add(object);
 		++noObjects;
 
@@ -90,11 +93,11 @@ public class Database {
 		} else {
 			classCounter.put(className, classCounter.get(className) + 1);
 		}
-//		System.out.println(classCounter.get("Acer")+" acer");
-//		System.out.println(classCounter.get("Quercus")+" quer");
-//		if (classCounter.get(object.getClassName()+1 == 0) {
-//			classNamesList.add(object.getClassName());
-//		}
+		// System.out.println(classCounter.get("Acer")+" acer");
+		// System.out.println(classCounter.get("Quercus")+" quer");
+		// if (classCounter.get(object.getClassName()+1 == 0) {
+		// classNamesList.add(object.getClassName());
+		// }
 
 		return true;
 	}
@@ -111,7 +114,7 @@ public class Database {
 
 		try {
 			Scanner sc = new Scanner(file);
-//Open file and read the first line to get number of features.
+			// Open file and read the first line to get number of features.
 			if (sc.hasNextLine()) {
 				line = sc.nextLine();
 				pos = line.split(", ");
@@ -148,9 +151,9 @@ public class Database {
 					featuresValues.add(Float.parseFloat(nextLine.get(i)));
 				}
 
-//				for (int i = 0; i < featuresValues.size(); i++) {
-//					System.out.println(featuresValues.get(i));
-//				}
+				// for (int i = 0; i < featuresValues.size(); i++) {
+				// System.out.println(featuresValues.get(i));
+				// }
 
 				if (checkFeaturesNumber(featuresValues.size(), classFeaturesNo)) {
 					if (!addObject(new Object(className, featuresValues))) {
@@ -187,6 +190,26 @@ public class Database {
 		}
 		return true;
 	}
+	
+	public void splitObjectList() {
+		
+		List<String> classNames = new ArrayList<>();
+		
+		firstClassObjects.clear();
+		secondClassObjects.clear();
+		
+		for(Map.Entry<String, Integer> entry : classCounter.entrySet()) {
+			classNames.add(entry.getKey());
+		}
+		
+		for(Object o:objects) {
+			if(o.getClassName().equals(classNames.get(0))) {
+				firstClassObjects.add(o);
+			}else if(o.getClassName().equals(classNames.get(1))) {
+				secondClassObjects.add(o);
+			}
+		}
+	}
 
 	public ArrayList<Object> getObjects() {
 		return objects;
@@ -218,6 +241,15 @@ public class Database {
 
 	public Float[][] getSecondClassArray() {
 		return secondClassArray;
+	}
+
+	public List<Object> getFirstClassObjectList() {
+		splitObjectList();
+		return firstClassObjects;
+	}
+
+	public List<Object> getSecondClassObjectList() {
+		return secondClassObjects;
 	}
 
 }

@@ -1,12 +1,28 @@
 package projo;
 
+import java.util.Scanner;
+
 public class Main {
 	public static void main(String[] args) {
 
 		Database db = new Database(0, 0, 0);
 		Mainwindow mainwindow = new Mainwindow();
+		Classifier classifier = new Classifier();
 		// db.load("C:\\Users\\Karol Patecki\\Downloads\\SMPD\\SMPD\\Maple_Oak.txt");
-		mainwindow.go();
+		
+		System.out.println("What you want?");
+		System.out.println("1=fisher, 2=NNClasifier");
+		
+		Scanner sc = new Scanner(System.in);
+		int listening = sc.nextInt();
+		System.out.println(db.getObjects().size());
+		
+		if(listening==1) {
+			mainwindow.go();
+		}else {
+			classifier.splitObjects(20);
+		}
+		sc.close();
 		// for (int i = 0; i < db.getNoFeatures(); i++) {
 		//
 		// for (Object ob : db.getObjects()) {
