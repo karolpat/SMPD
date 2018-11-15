@@ -1,7 +1,12 @@
 package projo;
 
-import java.awt.Component;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Label;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,6 +18,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
 public class SMPD {
@@ -22,21 +30,63 @@ public class SMPD {
 
 	private final int FISHER_SELECTED = 0;
 	private final int SFS_SELECTED = 1;
+	private final String[] CLASSIFIERS = { "NN", "kNN", "NM" };
+	private final int[] CONSECUTIVE_K = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
 	private String filePath;
 
 	private JFrame frmWelcome;
-	private JButton btnSelectFile;
-	private JCheckBox chckbxFisher;
-	private JCheckBox chckbxSfs;
 	private boolean loaded = false;
-	private JComboBox<Integer> comboBox;
 
 	private int methodSelection = -1;
+	private int classifierSelected;
+	private int kSelected = 1;
+
 	private int dimension;
+	private JTabbedPane tabbedPane;
+	private JPanel panel;
+	private JButton btnSelectFile;
+	private JCheckBox chckbxSfs;
+	private JCheckBox chckbxFisher;
 	private JButton btnCmon;
+	private JComboBox<Integer> comboBox;
+	private JPanel panel_1;
+	private JComboBox<Integer> k;
+	private JComboBox<String> classifier;
+	private Label kLabel;
+	private Label classifierLbl;
+	private JButton selectFileBtn;
+	private JButton trainBtn;
+	private JTextArea textArea;
+	private JButton executeBtn;
 
 	private void chooseFileButtonClicked(ActionEvent e) {
+		openFile();
+		if (loaded) {
+			comboBox.setEnabled(true);
+			for (int i = 1; i <= db.getNoFeatures(); i++) {
+				comboBox.addItem(i);
+			}
+		} else {
+			System.out.println("Something failed while loading file");
+		}
+	}
+
+	private void chooseFileButtonClickedClassifier(ActionEvent e) {
+
+		openFile();
+		if (loaded) {
+			classifier.setEnabled(true);
+			for (int i = 0; i < CLASSIFIERS.length; i++) {
+				classifier.addItem(CLASSIFIERS[i]);
+			}
+		} else {
+			System.out.println("Something failed while loading file");
+		}
+	}
+
+	private void openFile() {
+
 		JFileChooser fileChooser = new JFileChooser();
 		int returnValue = fileChooser.showOpenDialog(null);
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -45,30 +95,28 @@ public class SMPD {
 			System.out.println(db.getNoFeatures());
 			loaded = true;
 		}
-		if (loaded) {
-			comboBox.setEnabled(true);
-			for (int i = 1; i <= db.getNoFeatures(); i++) {
-				comboBox.addItem(i);
-			}
-		}
 	}
 
 	private void sfsClicked(ActionEvent ae) {
 		chckbxFisher.setSelected(false);
 		methodSelection = SFS_SELECTED;
-		if(loaded) btnCmon.setEnabled(true);
+		if (loaded)
+			btnCmon.setEnabled(true);
 	}
 
 	private void fisherClicked(ActionEvent ae) {
 		chckbxSfs.setSelected(false);
 		methodSelection = FISHER_SELECTED;
-		if(loaded) btnCmon.setEnabled(true);
-		
+		if (loaded)
+			btnCmon.setEnabled(true);
+
 	}
-	
+
 	private void compute(ActionEvent e) {
-		System.out.println(dimension + " dimension");
+		long startTime = System.currentTimeMillis();
 		mw.go(dimension, methodSelection, filePath);
+		long finishTime = System.currentTimeMillis();
+		System.out.println("Execution time in milisec: " + (finishTime - startTime));
 	}
 
 	/**
@@ -99,16 +147,31 @@ public class SMPD {
 	 */
 	private void initialize() {
 		frmWelcome = new JFrame();
+		frmWelcome.setIconImage(Toolkit.getDefaultToolkit()
+				.getImage(SMPD.class.getResource("/com/sun/javafx/webkit/prism/resources/mediaMute.png")));
 		frmWelcome.setTitle("Welcome");
 		frmWelcome.getContentPane().setEnabled(true);
-		frmWelcome.setBounds(100, 100, 634, 425);
+		frmWelcome.setBounds(100, 100, 656, 303);
 		frmWelcome.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmWelcome.getContentPane().setLayout(new BoxLayout(frmWelcome.getContentPane(), BoxLayout.PAGE_AXIS));
+		frmWelcome.getContentPane().setLayout(new BoxLayout(frmWelcome.getContentPane(), BoxLayout.X_AXIS));
+
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		frmWelcome.getContentPane().add(tabbedPane);
+
+		panel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		tabbedPane.addTab("Fishers", null, panel, null);
 
 		btnSelectFile = new JButton("Select file");
-		btnSelectFile.setAlignmentY(Component.TOP_ALIGNMENT);
 		btnSelectFile.setVerticalAlignment(SwingConstants.TOP);
-		frmWelcome.getContentPane().add(btnSelectFile);
+		btnSelectFile.setAlignmentY(0.0f);
+		btnSelectFile.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				chooseFileButtonClicked(e);
+			}
+		});
+		panel.add(btnSelectFile);
 
 		chckbxSfs = new JCheckBox("SFS");
 		chckbxSfs.addActionListener(new ActionListener() {
@@ -116,8 +179,7 @@ public class SMPD {
 				sfsClicked(ae);
 			}
 		});
-
-		frmWelcome.getContentPane().add(chckbxSfs);
+		panel.add(chckbxSfs);
 
 		chckbxFisher = new JCheckBox("Fisher");
 		chckbxFisher.addActionListener(new ActionListener() {
@@ -125,7 +187,7 @@ public class SMPD {
 				fisherClicked(ae);
 			}
 		});
-		frmWelcome.getContentPane().add(chckbxFisher);
+		panel.add(chckbxFisher);
 
 		btnCmon = new JButton("C'mon");
 		btnCmon.setEnabled(false);
@@ -134,21 +196,11 @@ public class SMPD {
 				compute(e);
 			}
 		});
-		
-		frmWelcome.getContentPane().add(btnCmon);
+		panel.add(btnCmon);
 
-		btnSelectFile.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				chooseFileButtonClicked(e);
-			}
-		});
-		
 		comboBox = new JComboBox<Integer>();
-		frmWelcome.getContentPane().add(comboBox);
 		comboBox.setEnabled(false);
 		comboBox.addItemListener(new ItemListener() {
-
 			@Override
 			public void itemStateChanged(ItemEvent ie) {
 				if (ie.getStateChange() == ItemEvent.SELECTED) {
@@ -156,6 +208,81 @@ public class SMPD {
 				}
 			}
 		});
+		panel.add(comboBox);
+
+		panel_1 = new JPanel();
+		panel_1.setMaximumSize(new Dimension(150, 150));
+		tabbedPane.addTab("Classifiers", null, panel_1, null);
+		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
+		selectFileBtn = new JButton("Select file");
+		selectFileBtn.setHorizontalAlignment(SwingConstants.LEFT);
+		selectFileBtn.setVerticalAlignment(SwingConstants.TOP);
+		selectFileBtn.setAlignmentY(0.0f);
+		selectFileBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				chooseFileButtonClickedClassifier(e);
+			}
+		});
+		panel_1.add(selectFileBtn);
+
+		classifierLbl = new Label("classifier:");
+		panel_1.add(classifierLbl);
+
+		classifier = new JComboBox();
+		classifier.setToolTipText("Classifier");
+		panel_1.add(classifier);
+		classifier.setEnabled(false);
+		classifier.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent ie) {
+				if (ie.getStateChange() == ItemEvent.SELECTED) {
+					classifierSelected = classifier.getSelectedIndex();
+					System.out.println(classifierSelected+" class");
+					if (classifierSelected == 1) {
+						k.setEnabled(true);
+						for (int i = 0; i < CONSECUTIVE_K.length; i++) {
+							k.addItem(CONSECUTIVE_K[i]);
+						}
+					} else {
+						k.setSelectedItem(1);
+						k.setEnabled(false);
+					}
+				}
+			}
+		});
+
+		kLabel = new Label("k:");
+		panel_1.add(kLabel);
+
+		k = new JComboBox();
+		k.setToolTipText("k");
+		k.setEnabled(false);
+		k.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent ie) {
+				if (ie.getStateChange() == ItemEvent.SELECTED) {
+					kSelected = (int) k.getSelectedItem();
+					System.out.println(kSelected+" k");
+				}
+			}
+		});
+		panel_1.add(k);
+
+		trainBtn = new JButton("Train");
+		trainBtn.setVerticalAlignment(SwingConstants.TOP);
+		trainBtn.setHorizontalAlignment(SwingConstants.LEFT);
+		trainBtn.setAlignmentY(0.0f);
+		panel_1.add(trainBtn);
+
+		textArea = new JTextArea(3, 15);
+		panel_1.add(textArea);
+		textArea.setBackground(Color.WHITE);
+		textArea.setBounds(new Rectangle(0, 0, 150, 50));
+
+		executeBtn = new JButton("C'mon");
+		panel_1.add(executeBtn);
 	}
 
 }
