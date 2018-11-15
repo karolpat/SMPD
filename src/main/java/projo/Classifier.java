@@ -14,7 +14,7 @@ public class Classifier {
 	private List<Object> testListFirstClass = new ArrayList<>();
 	private List<Object> testListSecondClass = new ArrayList<>();
 
-//	private Map<Integer, Object>
+	// private Map<Integer, Object>
 
 	private Database database = new Database(0, 0, 0);
 
@@ -30,8 +30,10 @@ public class Classifier {
 
 		correct = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass,
 				trainingListSecondClass, correct, k);
+		System.out.println(correct);
 		correct = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListFirstClass,
 				trainingListSecondClass, correct, k);
+		System.out.println(correct);
 
 	}
 
@@ -78,35 +80,39 @@ public class Classifier {
 	private int populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
 			List<Object> trainingListFirst, List<Object> trainingListSecond, int correct, int k) {
 
-//		Map<Integer, Double> featureDistanceMap = new HashMap<>();
+		// Map<Integer, Double> featureDistanceMap = new HashMap<>();
 		List<Double> distancesFirst;
 		List<Double> distancesSecond;
 
-//		int correct= 0;
+		// int correct= 0;
 
 		double first;
 		double second;
 
-		List<Double> kNNFirst = new ArrayList<>();
-		List<Double> kNNSecond = new ArrayList<>();
+		List<Double> kNNFirst; 
+		List<Double> kNNSecond;
 
 		for (Object testObject : testList) {
 			distancesFirst = new ArrayList<>();
 			distancesSecond = new ArrayList<>();
-
+			
+			kNNFirst = new ArrayList<>();
+			kNNSecond = new ArrayList<>();
+			
 			first = 0;
 			second = 0;
-//			lengthMap.put(testObject, distances);
 
 			for (int i = 0; i < database.getNoFeatures(); i++) {
 				distancesFirst.add(0d);
 				distancesSecond.add(0d);
 
 				for (Object trainingObject : trainingListFirst) {
-					distancesFirst.add((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)));
+					distancesFirst.add(Math
+							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)), 2));
 				}
 				for (Object trainingObject : trainingListSecond) {
-					distancesSecond.add((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)));
+					distancesSecond.add(Math
+							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)), 2));
 
 				}
 
@@ -117,14 +123,15 @@ public class Classifier {
 				kNNSecond = manageDistList(kNNSecond, second, k);
 
 			}
-			
-			//porównaæ sumê obu list i getClassName i zwiekszac correct w stosownym momencie
-			if (first < second && testObject.getClassName().equals("Acer")) {
+
+			double sumFirst = kNNFirst.stream().mapToDouble(x -> x.doubleValue()).sum();
+			double sumSecond = kNNSecond.stream().mapToDouble(x -> x.doubleValue()).sum();
+			System.out.println(sumFirst + " f, ssum: " + sumSecond);
+			if (sumFirst < sumSecond && testObject.getClassName().equals("Acer")) {
 				correct++;
-			} else if (first > second && testObject.getClassName().equals("Quercus")) {
+			} else if (sumFirst > sumSecond && testObject.getClassName().equals("Quercus")) {
 				correct++;
 			}
-			System.out.println(correct);
 		}
 		System.out.println("=============================================");
 		System.out.println(testList.size() + " test lsit");

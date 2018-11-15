@@ -22,7 +22,7 @@ public class Main {
 		int k=sc.nextInt();
 		sc.close();
 		if(listening==1) {
-			mainwindow.go();
+//			mainwindow.go();
 		}else {
 			classifier.classificate(percentage,k);
 		}

@@ -26,30 +26,30 @@ public class Mainwindow {
 	Float[][] firstClassArray;
 	Float[][] secondClassArray;
 
-	void go() {
+	void go(int dimension, int variant, String filePath) {
 
-		database.load("C:\\dev\\Maple_Oak.txt");
-
-		System.out.println("Enter number");
-		int dimension;
-		Scanner sc = new Scanner(System.in);
-		while (true) {
-			dimension = sc.nextInt();
-
-			if (dimension > 64 || dimension < 1) {
-
-				System.out.println("Enter number");
-				dimension = sc.nextInt();
-			} else {
-				break;
-			}
-		}
+		database.load(filePath);
+//
+//		System.out.println("Enter number");
+//		int dimension;
+//		Scanner sc = new Scanner(System.in);
+//		while (true) {
+//			dimension = sc.nextInt();
+//
+//			if (dimension > 64 || dimension < 1) {
+//
+//				System.out.println("Enter number");
+//				dimension = sc.nextInt();
+//			} else {
+//				break;
+//			}
+//		}
 
 		Scanner sc1 = new Scanner(System.in);
 
-		System.out.println("0=discriminant; 1=sequential");
-		int variant = sc1.nextInt();
-		sc1.close();
+//		System.out.println("0=discriminant; 1=sequential");
+//		int variant = sc1.nextInt();
+//		sc1.close();
 
 		System.out.println(dimension + " dim");
 		System.out.println(database.getNoClass() + " noclass");
