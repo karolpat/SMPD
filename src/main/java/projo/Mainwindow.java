@@ -96,7 +96,7 @@ public class Mainwindow {
 	private int[] discriminantFisher(int dimension) {
 
 		Combinations comb = new Combinations(database.getNoFeatures(), dimension);
-		Map<int[], Double> fishers = new ConcurrentHashMap<int[], Double>();
+		Map<int[], Double> fishers = new HashMap<int[], Double>();
 
 		for (int[] features : comb) {
 			double fisher = calculateFisher(features);

@@ -20,7 +20,7 @@ public class Main {
 		if(listening==1) {
 			mainwindow.go();
 		}else {
-			classifier.splitObjects(20);
+			classifier.classificate(20);
 		}
 		sc.close();
 		// for (int i = 0; i < db.getNoFeatures(); i++) {
