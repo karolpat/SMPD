@@ -23,25 +23,15 @@ public class Classifier {
 
 	public void classificate(int percentage) {
 		splitObjects(percentage);
-		Map<Object, Map<Integer, Double>> lengthMapFirstClass = new HashMap<>();
-		Map<Object, Map<Integer, Double>> lengthMapSecondClass = new HashMap<>();
-
-		lengthMapFirstClass = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass);
-		lengthMapSecondClass = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListSecondClass);
-
-//		for (int i = 0; i < database.getNoFeatures(); i++) {
-//			double firstClassDistance = 0;
-//			double secondClassDistance = 0;
-//
-//			firstClassDistance = lengthMapFirstClass.get(i);
-//			secondClassDistance = lengthMapSecondClass.get(i);
-//
-//		}
-//		double minFirstClass = lengthMapFirstClass
-
-		for (Object o : testListFirstClass) {
-
-		}
+		Map<Object, List<Double>> lengthMapFirstClass = new HashMap<>();
+		Map<Object, List<Double>> lengthMapSecondClass = new HashMap<>();
+		System.out.println(database.getNoObjects());
+		int correct= 0;
+		
+		correct = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass,
+				trainingListSecondClass,correct);
+		correct = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListFirstClass,
+				trainingListSecondClass,correct);
 
 	}
 
@@ -85,32 +75,53 @@ public class Classifier {
 		testListSecondClass = secondClassObjects.subList(newSize / 2, secondClassObjects.size());
 	}
 
-	private Map<Object, List<Double>>> populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
-			List<Object> trainingList) {
-		
+	private int populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
+			List<Object> trainingListFirst, List<Object> trainingListSecond, int correct) {
+
 //		Map<Integer, Double> featureDistanceMap = new HashMap<>();
-		List<Double> distances;
+		List<Double> distancesFirst;
+		List<Double> distancesSecond;
+
+//		int correct= 0;
+
+		double first;
+		double second;
 
 		for (Object testObject : testList) {
-			distances=new ArrayList<>();
-			lengthMap.put(testObject, distances);
-			
+			distancesFirst = new ArrayList<>();
+			distancesSecond = new ArrayList<>();
+
+			first = 0;
+			second = 0;
+//			lengthMap.put(testObject, distances);
+
 			for (int i = 0; i < database.getNoFeatures(); i++) {
-				distances.add(0d);
-				
-				for (Object trainingObject : trainingList) {
-					distances.add()
-					featureDistanceMap.put(i, featureDistanceMap.get(i)
-							+ Math.pow(testObject.getFetures().get(i) - trainingObject.getFetures().get(i), 2));
+				distancesFirst.add(0d);
+				distancesSecond.add(0d);
+
+				for (Object trainingObject : trainingListFirst) {
+					distancesFirst.add((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)));
 				}
-				featureDistanceMap.put(i, Math.sqrt(lengthMap.get(testObject).get(i)));
+				for (Object trainingObject : trainingListSecond) {
+					distancesSecond.add((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)));
+
+				}
+
+				first = Math.sqrt(distancesFirst.stream().mapToDouble(x -> x.doubleValue()).sum());
+				second = Math.sqrt(distancesSecond.stream().mapToDouble(x -> x.doubleValue()).sum());
+
 			}
 
-			lengthMap.put(testObject,featureDistanceMap );
-			System.out.println(testObject.getClassName() + " i, length: " + lengthMap.get(testObject).get(1));
+			if (first < second && testObject.getClassName().equals("Acer")) {
+				correct++;
+			} else if (first > second && testObject.getClassName().equals("Quercus")) {
+				correct++;
+			}
+			System.out.println(correct);
 		}
-
-		return lengthMap;
+		System.out.println("=============================================");
+		System.out.println(testList.size()+" test lsit");
+		return correct;
 	}
 
 	public List<Object> getFirstClassObject() {

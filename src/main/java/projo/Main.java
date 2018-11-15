@@ -16,13 +16,15 @@ public class Main {
 		Scanner sc = new Scanner(System.in);
 		int listening = sc.nextInt();
 		System.out.println(db.getObjects().size());
-		
+		System.out.println("Give me %");
+		int percentage = sc.nextInt();
+		sc.close();
 		if(listening==1) {
 			mainwindow.go();
 		}else {
-			classifier.classificate(20);
+			classifier.classificate(percentage);
 		}
-		sc.close();
+		
 		// for (int i = 0; i < db.getNoFeatures(); i++) {
 		//
 		// for (Object ob : db.getObjects()) {
