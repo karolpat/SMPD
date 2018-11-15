@@ -89,7 +89,6 @@ public class Mainwindow {
 			}
 		}
 		bestFeature[0] = max_ind;
-		System.out.println("best: " + Arrays.toString(bestFeature) + "; " + FLD);
 		return max_ind;
 	}
 
@@ -104,14 +103,14 @@ public class Mainwindow {
 		}
 
 		int[] result = Collections.max(fishers.entrySet(), Map.Entry.comparingByValue()).getKey();
-		System.out.println(Arrays.toString(result) + " max");
+		System.out.println(Arrays.toString(result) + " <- Best set of features.");
 		return result;
 	}
 
 	private int[] sequentialFisher(int dimension) {
 
 		List<Integer> features = new ArrayList<>();
-		List<Integer> featureList;
+		List<Integer> featureList= new ArrayList<>();
 		// Set<Integer> features = new HashSet<>();
 		features.add(getFisher());
 
@@ -119,9 +118,8 @@ public class Mainwindow {
 			double[] consecutiveFeatures = new double[database.getNoFeatures()];
 
 			for (int j = 0; j < database.getNoFeatures(); j++) {
-				if (i == j || features.contains(j)) {
-					continue;
-				} else {
+				if (!features.contains(j)) {
+					
 					featureList = new ArrayList<>(features);
 					featureList.add(j);
 				}
@@ -134,7 +132,7 @@ public class Mainwindow {
 			features.add(bestFeatureIndex);
 		}
 		int[] result = features.stream().mapToInt(x -> x).toArray();
-		System.out.println(Arrays.toString(result));
+		System.out.println(Arrays.toString(result)+ " <- Best set of features.");
 		return result;
 	}
 
