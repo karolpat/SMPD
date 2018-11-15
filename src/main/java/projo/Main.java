@@ -18,11 +18,13 @@ public class Main {
 		System.out.println(db.getObjects().size());
 		System.out.println("Give me %");
 		int percentage = sc.nextInt();
+		System.out.println("Give me k, max 10");
+		int k=sc.nextInt();
 		sc.close();
 		if(listening==1) {
 			mainwindow.go();
 		}else {
-			classifier.classificate(percentage);
+			classifier.classificate(percentage,k);
 		}
 		
 		// for (int i = 0; i < db.getNoFeatures(); i++) {

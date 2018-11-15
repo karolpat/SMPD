@@ -21,17 +21,17 @@ public class Classifier {
 	private List<Object> firstClassObjects;
 	private List<Object> secondClassObjects;
 
-	public void classificate(int percentage) {
+	public void classificate(int percentage, int k) {
 		splitObjects(percentage);
 		Map<Object, List<Double>> lengthMapFirstClass = new HashMap<>();
 		Map<Object, List<Double>> lengthMapSecondClass = new HashMap<>();
 		System.out.println(database.getNoObjects());
-		int correct= 0;
-		
+		int correct = 0;
+
 		correct = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass,
-				trainingListSecondClass,correct);
+				trainingListSecondClass, correct, k);
 		correct = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListFirstClass,
-				trainingListSecondClass,correct);
+				trainingListSecondClass, correct, k);
 
 	}
 
@@ -76,7 +76,7 @@ public class Classifier {
 	}
 
 	private int populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
-			List<Object> trainingListFirst, List<Object> trainingListSecond, int correct) {
+			List<Object> trainingListFirst, List<Object> trainingListSecond, int correct, int k) {
 
 //		Map<Integer, Double> featureDistanceMap = new HashMap<>();
 		List<Double> distancesFirst;
@@ -86,6 +86,9 @@ public class Classifier {
 
 		double first;
 		double second;
+
+		List<Double> kNNFirst = new ArrayList<>();
+		List<Double> kNNSecond = new ArrayList<>();
 
 		for (Object testObject : testList) {
 			distancesFirst = new ArrayList<>();
@@ -110,8 +113,10 @@ public class Classifier {
 				first = Math.sqrt(distancesFirst.stream().mapToDouble(x -> x.doubleValue()).sum());
 				second = Math.sqrt(distancesSecond.stream().mapToDouble(x -> x.doubleValue()).sum());
 
-			}
+				kNNFirst = manageDistList(kNNFirst, first, k);
+				kNNSecond = manageDistList(kNNSecond, second, k);
 
+			}
 			if (first < second && testObject.getClassName().equals("Acer")) {
 				correct++;
 			} else if (first > second && testObject.getClassName().equals("Quercus")) {
@@ -120,8 +125,22 @@ public class Classifier {
 			System.out.println(correct);
 		}
 		System.out.println("=============================================");
-		System.out.println(testList.size()+" test lsit");
+		System.out.println(testList.size() + " test lsit");
 		return correct;
+	}
+
+	private List<Double> manageDistList(List<Double> list, double element, int k) {
+
+		if (list.size() == k) {
+			if (Collections.min(list) > element) {
+				list.remove(list.indexOf(Collections.min(list)));
+				list.add(element);
+			}
+		} else {
+			list.add(element);
+		}
+
+		return list;
 	}
 
 	public List<Object> getFirstClassObject() {
