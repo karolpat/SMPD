@@ -14,6 +14,8 @@ public class Classifier {
 	private List<Object> testListFirstClass = new ArrayList<>();
 	private List<Object> testListSecondClass = new ArrayList<>();
 
+//	private Map<Integer, Object>
+
 	private Database database = new Database(0, 0, 0);
 
 	private List<Object> firstClassObjects;
@@ -21,23 +23,25 @@ public class Classifier {
 
 	public void classificate(int percentage) {
 		splitObjects(percentage);
-		Map<Integer, Double> lengthMapFirstClass = new HashMap<>();
-		Map<Integer, Double> lengthMapSecondClass = new HashMap<>();
-
-//		for (int i = 0; i < database.getNoFeatures(); i++) {
-//			lengthMapFirstClass.put(i, 0d);
-//			lengthMapSecondClass.put(i, 0d);
-//			for (Object testObject : testListFirstClass) {
-//
-//				for (Object trainingObject : trainingListFirstClass) {
-//					lengthMapFirstClass.put(i, lengthMapFirstClass.get(i)
-//							+ Math.pow(testObject.getFetures().get(i) - trainingObject.getFetures().get(i), 2));
-//				}
-//			}
-//		}
+		Map<Object, Map<Integer, Double>> lengthMapFirstClass = new HashMap<>();
+		Map<Object, Map<Integer, Double>> lengthMapSecondClass = new HashMap<>();
 
 		lengthMapFirstClass = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass);
 		lengthMapSecondClass = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListSecondClass);
+
+//		for (int i = 0; i < database.getNoFeatures(); i++) {
+//			double firstClassDistance = 0;
+//			double secondClassDistance = 0;
+//
+//			firstClassDistance = lengthMapFirstClass.get(i);
+//			secondClassDistance = lengthMapSecondClass.get(i);
+//
+//		}
+//		double minFirstClass = lengthMapFirstClass
+
+		for (Object o : testListFirstClass) {
+
+		}
 
 	}
 
@@ -81,21 +85,29 @@ public class Classifier {
 		testListSecondClass = secondClassObjects.subList(newSize / 2, secondClassObjects.size());
 	}
 
-	private Map<Integer, Double> populateLengthMap(Map<Integer, Double> lengthMap, List<Object> testList,
+	private Map<Object, List<Double>>> populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
 			List<Object> trainingList) {
+		
+//		Map<Integer, Double> featureDistanceMap = new HashMap<>();
+		List<Double> distances;
 
-		for (int i = 0; i < database.getNoFeatures(); i++) {
-			lengthMap.put(i, 0d);
-			for (Object testObject : testList) {
-
+		for (Object testObject : testList) {
+			distances=new ArrayList<>();
+			lengthMap.put(testObject, distances);
+			
+			for (int i = 0; i < database.getNoFeatures(); i++) {
+				distances.add(0d);
+				
 				for (Object trainingObject : trainingList) {
-					lengthMap.put(i, lengthMap.get(i)
+					distances.add()
+					featureDistanceMap.put(i, featureDistanceMap.get(i)
 							+ Math.pow(testObject.getFetures().get(i) - trainingObject.getFetures().get(i), 2));
 				}
+				featureDistanceMap.put(i, Math.sqrt(lengthMap.get(testObject).get(i)));
 			}
-			
-			lengthMap.put(i, Math.sqrt(lengthMap.get(i)));
-			System.out.println(i+" i, length: "+lengthMap.get(i));
+
+			lengthMap.put(testObject,featureDistanceMap );
+			System.out.println(testObject.getClassName() + " i, length: " + lengthMap.get(testObject).get(1));
 		}
 
 		return lengthMap;
