@@ -117,6 +117,8 @@ public class Classifier {
 				kNNSecond = manageDistList(kNNSecond, second, k);
 
 			}
+			
+			//porównaæ sumê obu list i getClassName i zwiekszac correct w stosownym momencie
 			if (first < second && testObject.getClassName().equals("Acer")) {
 				correct++;
 			} else if (first > second && testObject.getClassName().equals("Quercus")) {
