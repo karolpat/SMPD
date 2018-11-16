@@ -24,8 +24,6 @@ public class Classifier {
 
 	public void classificate(int percentage, int k, int classifier) {
 
-		// Map<Object, List<Double>> lengthMapFirstClass = new HashMap<>();
-		// Map<Object, List<Double>> lengthMapSecondClass = new HashMap<>();
 		System.out.println(database.getNoObjects());
 		int correct = 0;
 		if (classifier == 0 || classifier == 1) {
@@ -45,7 +43,7 @@ public class Classifier {
 
 		double correctness = (double) correct / (double) (testListFirstClass.size() + testListSecondClass.size()) * 100;
 		DecimalFormat df = new DecimalFormat("##.00");
-
+		System.out.println(testListFirstClass.size()+testListSecondClass.size() +" <- Number of all tested elements.");
 		System.out.println(correct + " <- Number of correct matches.");
 		System.out.println(k + " <- k.");
 		System.out.println(CLASSIFIERS[classifier] + " <- Classifier selected.");
@@ -149,7 +147,8 @@ public class Classifier {
 
 		List<Double> distancesFirst;
 		List<Double> distancesSecond;
-		Map<Object, Float> averageMap = new HashMap<>();
+		Map<Integer, Double> averageMapFirst = getAverages(trainingListFirst);
+		Map<Integer, Double> averageMapSecond = getAverages(trainingListSecond);
 
 		double first;
 		double second;
@@ -171,32 +170,11 @@ public class Classifier {
 				distancesFirst.add(0d);
 				distancesSecond.add(0d);
 
-				for (Object trainingObject : trainingListFirst) {
-					if (!averageMap.containsKey(trainingObject)) {
-						averageMap.put(trainingObject, trainingObject.getFetures().get(i));
-					} else {
-						averageMap.put(trainingObject, (averageMap.get(trainingObject) + i));
-					}
-				}
-				
-				for (Object trainingObject : trainingListSecond) {
-					if (!averageMap.containsKey(trainingObject)) {
-						averageMap.put(trainingObject, trainingObject.getFetures().get(i));
-					} else {
-						averageMap.put(trainingObject, (averageMap.get(trainingObject) + i));
-					}
-				}
-
-				for (Object trainingObject : trainingListFirst) {
-					double objectAverage=0;
-					objectAverage = (averageMap.get(trainingObject) / database.getNoFeatures());
-					System.out.println(objectAverage+" avg");
-					distancesFirst.add(Math.pow((double) (objectAverage - testObject.getFetures().get(i)), 2));
-				}
-				for (Object trainingObject : trainingListSecond) {
-					double objectAverage = averageMap.get(trainingObject) / database.getNoFeatures();
-					distancesSecond.add(Math.pow((double) (objectAverage - testObject.getFetures().get(i)), 2));
-				}
+				// double objectAverage=0;
+				// objectAverage = (averageMapFirst.get(trainingObject) /
+				// database.getNoFeatures());
+				distancesFirst.add(Math.pow((double) (averageMapFirst.get(i) - testObject.getFetures().get(i)), 2));
+				distancesSecond.add(Math.pow((double) (averageMapSecond.get(i) - testObject.getFetures().get(i)), 2));
 
 				first = Math.sqrt(distancesFirst.stream().mapToDouble(x -> x.doubleValue()).sum());
 				second = Math.sqrt(distancesSecond.stream().mapToDouble(x -> x.doubleValue()).sum());
@@ -230,6 +208,24 @@ public class Classifier {
 		}
 
 		return list;
+	}
+
+	private Map<Integer, Double> getAverages(List<Object> list) {
+
+		Map<Integer, Double> averages = new HashMap<>();
+
+		for (int i = 0; i < database.getNoFeatures(); i++) {
+
+			List<Float> listAvg = new ArrayList<>();
+			averages.put(i, 0d);
+			for (Object o : list) {
+				listAvg.add(o.getFetures().get(i));
+			}
+			double sum = listAvg.stream().mapToDouble(f -> f.doubleValue()).sum();
+			averages.put(i, sum / list.size());
+		}
+
+		return averages;
 	}
 
 	public List<Object> getFirstClassObject() {
