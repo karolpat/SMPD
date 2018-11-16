@@ -44,8 +44,8 @@ public class SMPD {
 	private int classifierSelected;
 	private int kSelected = 1;
 	private int percentage;
-	private boolean trained=false;
-
+	private int[] bestFeatures;
+	
 	private int dimension;
 	private JTabbedPane tabbedPane;
 	private JPanel panel;
@@ -110,7 +110,7 @@ public class SMPD {
 					JOptionPane.showMessageDialog(frmWelcome, "Insert proper value 1-99.");
 					executeBtn.setEnabled(false);
 				}else {
-					clsfr.splitObjects(percentage);
+					clsfr.splitObjects(percentage,filePath);
 					executeBtn.setEnabled(true);
 				}
 				
@@ -145,7 +145,7 @@ public class SMPD {
 
 	private void compute(ActionEvent e) {
 		long startTime = System.currentTimeMillis();
-		mw.go(dimension, methodSelection, filePath);
+		bestFeatures=mw.go(dimension, methodSelection, filePath);
 		long finishTime = System.currentTimeMillis();
 		System.out.println("Execution time in milisec: " + (finishTime - startTime));
 	}

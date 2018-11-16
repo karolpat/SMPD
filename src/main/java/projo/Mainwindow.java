@@ -26,30 +26,11 @@ public class Mainwindow {
 	Float[][] firstClassArray;
 	Float[][] secondClassArray;
 
-	void go(int dimension, int variant, String filePath) {
+	int[] go(int dimension, int variant, String filePath) {
 
 		database.load(filePath);
-//
-//		System.out.println("Enter number");
-//		int dimension;
-//		Scanner sc = new Scanner(System.in);
-//		while (true) {
-//			dimension = sc.nextInt();
-//
-//			if (dimension > 64 || dimension < 1) {
-//
-//				System.out.println("Enter number");
-//				dimension = sc.nextInt();
-//			} else {
-//				break;
-//			}
-//		}
 
 		Scanner sc1 = new Scanner(System.in);
-
-//		System.out.println("0=discriminant; 1=sequential");
-//		int variant = sc1.nextInt();
-//		sc1.close();
 
 		System.out.println(dimension + " dim");
 		System.out.println(database.getNoClass() + " noclass");
@@ -61,19 +42,19 @@ public class Mainwindow {
 		getClassStds(featureStdsFirstClass, featureStdsSecondClass);
 		if (variant == 0) {
 			if (dimension == 1) {
-				getFisher();
+				return getFisher();
 			} else {
-				discriminantFisher(dimension);
+			return discriminantFisher(dimension);
 			}
 		} else if (variant == 1) {
-			sequentialFisher(dimension);
+			return sequentialFisher(dimension);
 		} else {
 			System.out.println("end");
 		}
-
+		return null;
 	}
 
-	private int getFisher() {
+	private int[] getFisher() {
 		int[] bestFeature = new int[1];
 		double FLD = 0;
 		double temp;
@@ -89,7 +70,7 @@ public class Mainwindow {
 			}
 		}
 		bestFeature[0] = max_ind;
-		return max_ind;
+		return bestFeature;
 	}
 
 	private int[] discriminantFisher(int dimension) {
@@ -110,29 +91,28 @@ public class Mainwindow {
 	private int[] sequentialFisher(int dimension) {
 
 		List<Integer> features = new ArrayList<>();
-		List<Integer> featureList= new ArrayList<>();
+		List<Integer> featureList = new ArrayList<>();
 		// Set<Integer> features = new HashSet<>();
-		features.add(getFisher());
+		features.add(getFisher()[0]);
 
 		for (int i = 0; i < dimension - 1; i++) {
 			double[] consecutiveFeatures = new double[database.getNoFeatures()];
 
 			for (int j = 0; j < database.getNoFeatures(); j++) {
 				if (!features.contains(j)) {
-					
+
 					featureList = new ArrayList<>(features);
 					featureList.add(j);
 				}
 
 				int[] featuresArray = featureList.stream().mapToInt(x -> x).toArray();
-
+				System.out.println(Arrays.toString(featuresArray));
 				consecutiveFeatures[j] = calculateFisher(featuresArray);
 			}
 			int bestFeatureIndex = getIndexOfLargest(consecutiveFeatures);
 			features.add(bestFeatureIndex);
 		}
 		int[] result = features.stream().mapToInt(x -> x).toArray();
-		System.out.println(Arrays.toString(result)+ " <- Best set of features.");
 		return result;
 	}
 
@@ -167,21 +147,21 @@ public class Mainwindow {
 
 		Matrix sFirstClassMtx = new Matrix(sFirstClassArray);
 		Matrix sFirstClassMulti = sFirstClassMtx.times(sFirstClassMtx.transpose());
+		sFirstClassMulti.timesEquals(1.0 / (firstClassArray[0].length * 1.0));
 
 		Matrix sSecondClassMtx = new Matrix(sSecondClassArray);
 		Matrix sSecondClassMulti = sSecondClassMtx.times(sSecondClassMtx.transpose());
+		sSecondClassMulti.timesEquals(1.0 / (secondClassArray[0].length * 1.0));
 
 		Matrix subtracted = sFirstClassMulti.minus(sSecondClassMulti);
 
 		double det = subtracted.det();
-
 		double numerator = 0;
 
 		for (Double d : vector) {
 			numerator += Math.pow(d, 2);
 		}
 		return Math.sqrt(numerator) / det;
-		// System.out.println(FLD);
 	}
 
 	private void getClassAverages(Map<Integer, Float> featureAvgFirstClass, Map<Integer, Float> featureAvgSecondClass) {
@@ -234,7 +214,7 @@ public class Mainwindow {
 			return -1; // null or empty
 
 		int largest = 0;
-		for (int i = 1; i < array.length; i++) {
+		for (int i = 0; i < array.length; i++) {
 			if (array[i] > array[largest])
 				largest = i;
 		}

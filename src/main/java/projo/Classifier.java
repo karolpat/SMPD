@@ -52,8 +52,8 @@ public class Classifier {
 
 	}
 
-	public void splitObjects(int percentage) {
-		database.load("C:\\dev\\Maple_Oak.txt");
+	public void splitObjects(int percentage, String filePath) {
+		database.load(filePath);
 
 		firstClassObjects = database.getFirstClassObjectList();
 		secondClassObjects = database.getSecondClassObjectList();
