@@ -175,19 +175,22 @@ public class Classifier {
 					if (!averageMap.containsKey(trainingObject)) {
 						averageMap.put(trainingObject, trainingObject.getFetures().get(i));
 					} else {
-						averageMap.put(trainingObject, averageMap.get(trainingObject) + i);
+						averageMap.put(trainingObject, (averageMap.get(trainingObject) + i));
 					}
 				}
+				
 				for (Object trainingObject : trainingListSecond) {
 					if (!averageMap.containsKey(trainingObject)) {
 						averageMap.put(trainingObject, trainingObject.getFetures().get(i));
 					} else {
-						averageMap.put(trainingObject, averageMap.get(trainingObject) + i);
+						averageMap.put(trainingObject, (averageMap.get(trainingObject) + i));
 					}
 				}
 
 				for (Object trainingObject : trainingListFirst) {
-					double objectAverage = averageMap.get(trainingObject) / database.getNoFeatures();
+					double objectAverage=0;
+					objectAverage = (averageMap.get(trainingObject) / database.getNoFeatures());
+					System.out.println(objectAverage+" avg");
 					distancesFirst.add(Math.pow((double) (objectAverage - testObject.getFetures().get(i)), 2));
 				}
 				for (Object trainingObject : trainingListSecond) {
