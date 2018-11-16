@@ -32,7 +32,7 @@ public class SMPD {
 
 	private final int FISHER_SELECTED = 0;
 	private final int SFS_SELECTED = 1;
-	private final String[] CLASSIFIERS = { "NN", "kNN", "NM" };
+	private final String[] CLASSIFIERS = { "NN", "kNN", "NM", "kNM" };
 	private final int[] CONSECUTIVE_K = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
 	private String filePath;
@@ -271,7 +271,7 @@ public class SMPD {
 				if (ie.getStateChange() == ItemEvent.SELECTED) {
 					classifierSelected = classifier.getSelectedIndex();
 //					System.out.println(classifierSelected+" class");
-					if (classifierSelected == 1) {
+					if (classifierSelected == 1 || classifierSelected == 3) {
 						k.setEnabled(true);
 						for (int i = 0; i < CONSECUTIVE_K.length; i++) {
 							k.addItem(CONSECUTIVE_K[i]);

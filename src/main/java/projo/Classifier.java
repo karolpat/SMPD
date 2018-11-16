@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Classifier {
-	
-	private final String[] CLASSIFIERS = { "NN", "kNN", "NM" };
+
+	private final String[] CLASSIFIERS = { "NN", "kNN", "NM", "kNM" };
 
 	private List<Object> trainingListFirstClass = new ArrayList<>();
 	private List<Object> trainingListSecondClass = new ArrayList<>();
@@ -24,24 +24,32 @@ public class Classifier {
 
 	public void classificate(int percentage, int k, int classifier) {
 
-		Map<Object, List<Double>> lengthMapFirstClass = new HashMap<>();
-		Map<Object, List<Double>> lengthMapSecondClass = new HashMap<>();
+		// Map<Object, List<Double>> lengthMapFirstClass = new HashMap<>();
+		// Map<Object, List<Double>> lengthMapSecondClass = new HashMap<>();
 		System.out.println(database.getNoObjects());
 		int correct = 0;
+		if (classifier == 0 || classifier == 1) {
 
-		correct = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass,
-				trainingListSecondClass, correct, k);
+			correct = populateLengthListNeighbour(testListFirstClass, trainingListFirstClass, trainingListSecondClass,
+					correct, k);
 
-		correct = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListFirstClass,
-				trainingListSecondClass, correct, k);
-		
-		double correctness = (double)correct/(double)(testListFirstClass.size()+testListSecondClass.size())*100;
+			correct = populateLengthListNeighbour(testListSecondClass, trainingListFirstClass, trainingListSecondClass,
+					correct, k);
+		} else if (classifier == 2 || classifier == 3) {
+			correct = populateLengthListAverage(testListFirstClass, trainingListFirstClass, trainingListSecondClass,
+					correct, k);
+
+			correct = populateLengthListAverage(testListSecondClass, trainingListFirstClass, trainingListSecondClass,
+					correct, k);
+		}
+
+		double correctness = (double) correct / (double) (testListFirstClass.size() + testListSecondClass.size()) * 100;
 		DecimalFormat df = new DecimalFormat("##.00");
-		
-		System.out.println(correct+" <- Number of correct matches.");
-		System.out.println(k+" <- k.");
-		System.out.println(CLASSIFIERS[classifier]+ " <- Classifier selected.");
-		System.out.println(df.format(correctness)+"% <- of correctness.");
+
+		System.out.println(correct + " <- Number of correct matches.");
+		System.out.println(k + " <- k.");
+		System.out.println(CLASSIFIERS[classifier] + " <- Classifier selected.");
+		System.out.println(df.format(correctness) + "% <- of correctness.");
 		System.out.println("=============================================");
 
 	}
@@ -80,8 +88,8 @@ public class Classifier {
 		testListSecondClass = secondClassObjects.subList(newSize / 2, secondClassObjects.size());
 	}
 
-	private int populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
-			List<Object> trainingListFirst, List<Object> trainingListSecond, int correct, int k) {
+	private int populateLengthListNeighbour(List<Object> testList, List<Object> trainingListFirst,
+			List<Object> trainingListSecond, int correct, int k) {
 
 		List<Double> distancesFirst;
 		List<Double> distancesSecond;
@@ -89,16 +97,16 @@ public class Classifier {
 		double first;
 		double second;
 
-		List<Double> kNNFirst; 
+		List<Double> kNNFirst;
 		List<Double> kNNSecond;
 
 		for (Object testObject : testList) {
 			distancesFirst = new ArrayList<>();
 			distancesSecond = new ArrayList<>();
-			
+
 			kNNFirst = new ArrayList<>();
 			kNNSecond = new ArrayList<>();
-			
+
 			first = 0;
 			second = 0;
 
@@ -114,6 +122,77 @@ public class Classifier {
 					distancesSecond.add(Math
 							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)), 2));
 
+				}
+
+				first = Math.sqrt(distancesFirst.stream().mapToDouble(x -> x.doubleValue()).sum());
+				second = Math.sqrt(distancesSecond.stream().mapToDouble(x -> x.doubleValue()).sum());
+
+				kNNFirst = manageDistList(kNNFirst, first, k);
+				kNNSecond = manageDistList(kNNSecond, second, k);
+
+			}
+
+			double sumFirst = kNNFirst.stream().mapToDouble(x -> x.doubleValue()).sum();
+			double sumSecond = kNNSecond.stream().mapToDouble(x -> x.doubleValue()).sum();
+
+			if (sumFirst < sumSecond && testObject.getClassName().equals("Acer")) {
+				correct++;
+			} else if (sumFirst > sumSecond && testObject.getClassName().equals("Quercus")) {
+				correct++;
+			}
+		}
+		return correct;
+	}
+
+	private int populateLengthListAverage(List<Object> testList, List<Object> trainingListFirst,
+			List<Object> trainingListSecond, int correct, int k) {
+
+		List<Double> distancesFirst;
+		List<Double> distancesSecond;
+		Map<Object, Float> averageMap = new HashMap<>();
+
+		double first;
+		double second;
+
+		List<Double> kNNFirst;
+		List<Double> kNNSecond;
+
+		for (Object testObject : testList) {
+			distancesFirst = new ArrayList<>();
+			distancesSecond = new ArrayList<>();
+
+			kNNFirst = new ArrayList<>();
+			kNNSecond = new ArrayList<>();
+
+			first = 0;
+			second = 0;
+
+			for (int i = 0; i < database.getNoFeatures(); i++) {
+				distancesFirst.add(0d);
+				distancesSecond.add(0d);
+
+				for (Object trainingObject : trainingListFirst) {
+					if (!averageMap.containsKey(trainingObject)) {
+						averageMap.put(trainingObject, trainingObject.getFetures().get(i));
+					} else {
+						averageMap.put(trainingObject, averageMap.get(trainingObject) + i);
+					}
+				}
+				for (Object trainingObject : trainingListSecond) {
+					if (!averageMap.containsKey(trainingObject)) {
+						averageMap.put(trainingObject, trainingObject.getFetures().get(i));
+					} else {
+						averageMap.put(trainingObject, averageMap.get(trainingObject) + i);
+					}
+				}
+
+				for (Object trainingObject : trainingListFirst) {
+					double objectAverage = averageMap.get(trainingObject) / database.getNoFeatures();
+					distancesFirst.add(Math.pow((double) (objectAverage - testObject.getFetures().get(i)), 2));
+				}
+				for (Object trainingObject : trainingListSecond) {
+					double objectAverage = averageMap.get(trainingObject) / database.getNoFeatures();
+					distancesSecond.add(Math.pow((double) (objectAverage - testObject.getFetures().get(i)), 2));
 				}
 
 				first = Math.sqrt(distancesFirst.stream().mapToDouble(x -> x.doubleValue()).sum());
