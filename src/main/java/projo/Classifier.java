@@ -1,5 +1,6 @@
 package projo;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public class Classifier {
+	
+	private final String[] CLASSIFIERS = { "NN", "kNN", "NM" };
 
 	private List<Object> trainingListFirstClass = new ArrayList<>();
 	private List<Object> trainingListSecondClass = new ArrayList<>();
@@ -14,15 +17,13 @@ public class Classifier {
 	private List<Object> testListFirstClass = new ArrayList<>();
 	private List<Object> testListSecondClass = new ArrayList<>();
 
-	// private Map<Integer, Object>
-
 	private Database database = new Database(0, 0, 0);
 
 	private List<Object> firstClassObjects;
 	private List<Object> secondClassObjects;
 
-	public void classificate(int percentage, int k) {
-		splitObjects(percentage);
+	public void classificate(int percentage, int k, int classifier) {
+
 		Map<Object, List<Double>> lengthMapFirstClass = new HashMap<>();
 		Map<Object, List<Double>> lengthMapSecondClass = new HashMap<>();
 		System.out.println(database.getNoObjects());
@@ -30,10 +31,18 @@ public class Classifier {
 
 		correct = populateLengthMap(lengthMapFirstClass, testListFirstClass, trainingListFirstClass,
 				trainingListSecondClass, correct, k);
-		System.out.println(correct);
+
 		correct = populateLengthMap(lengthMapSecondClass, testListSecondClass, trainingListFirstClass,
 				trainingListSecondClass, correct, k);
-		System.out.println(correct);
+		
+		double correctness = (double)correct/(double)(testListFirstClass.size()+testListSecondClass.size())*100;
+		DecimalFormat df = new DecimalFormat("##.00");
+		
+		System.out.println(correct+" <- Number of correct matches.");
+		System.out.println(k+" <- k.");
+		System.out.println(CLASSIFIERS[classifier]+ " <- Classifier selected.");
+		System.out.println(df.format(correctness)+"% <- of correctness.");
+		System.out.println("=============================================");
 
 	}
 
@@ -46,13 +55,7 @@ public class Classifier {
 		firstClassObjects = shuffleList(firstClassObjects);
 		secondClassObjects = shuffleList(secondClassObjects);
 
-		System.out.println(
-				"fc: " + firstClassObjects.size() + " , sc: " + secondClassObjects.size() + " per: " + percentage);
 		populateTrainingList(percentage, firstClassObjects, secondClassObjects);
-		System.out.println(trainingListFirstClass.size() + " sizetrainingFC");
-		System.out.println(trainingListSecondClass.size() + " sizetrainingSC");
-		System.out.println(testListFirstClass.size() + " sizeTestFC");
-		System.out.println(testListSecondClass.size() + " sizeTestSC");
 	}
 
 	private List<Object> shuffleList(List<Object> listToShuffle) {
@@ -80,11 +83,8 @@ public class Classifier {
 	private int populateLengthMap(Map<Object, List<Double>> lengthMap, List<Object> testList,
 			List<Object> trainingListFirst, List<Object> trainingListSecond, int correct, int k) {
 
-		// Map<Integer, Double> featureDistanceMap = new HashMap<>();
 		List<Double> distancesFirst;
 		List<Double> distancesSecond;
-
-		// int correct= 0;
 
 		double first;
 		double second;
@@ -126,15 +126,13 @@ public class Classifier {
 
 			double sumFirst = kNNFirst.stream().mapToDouble(x -> x.doubleValue()).sum();
 			double sumSecond = kNNSecond.stream().mapToDouble(x -> x.doubleValue()).sum();
-			System.out.println(sumFirst + " f, ssum: " + sumSecond);
+
 			if (sumFirst < sumSecond && testObject.getClassName().equals("Acer")) {
 				correct++;
 			} else if (sumFirst > sumSecond && testObject.getClassName().equals("Quercus")) {
 				correct++;
 			}
 		}
-		System.out.println("=============================================");
-		System.out.println(testList.size() + " test lsit");
 		return correct;
 	}
 

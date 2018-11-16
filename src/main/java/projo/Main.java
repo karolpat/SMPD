@@ -24,7 +24,7 @@ public class Main {
 		if(listening==1) {
 //			mainwindow.go();
 		}else {
-			classifier.classificate(percentage,k);
+//			classifier.classificate(percentage,k);
 		}
 		
 		// for (int i = 0; i < db.getNoFeatures(); i++) {

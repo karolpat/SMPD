@@ -18,6 +18,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -27,6 +28,7 @@ public class SMPD {
 
 	Database db = new Database(0, 0, 0);
 	Mainwindow mw = new Mainwindow();
+	Classifier clsfr=new Classifier();
 
 	private final int FISHER_SELECTED = 0;
 	private final int SFS_SELECTED = 1;
@@ -41,6 +43,8 @@ public class SMPD {
 	private int methodSelection = -1;
 	private int classifierSelected;
 	private int kSelected = 1;
+	private int percentage;
+	private boolean trained=false;
 
 	private int dimension;
 	private JTabbedPane tabbedPane;
@@ -92,9 +96,36 @@ public class SMPD {
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			filePath = fileChooser.getSelectedFile().getAbsolutePath();
 			db.load(filePath);
-			System.out.println(db.getNoFeatures());
+//			System.out.println(db.getNoFeatures());
 			loaded = true;
 		}
+	}
+	
+	private void splitDataset(ActionEvent ae) {
+		String input = textArea.getText();
+		if(!input.isEmpty()) {
+			try {
+				percentage=Integer.parseInt(input);
+				if(percentage<1 || percentage>99) {
+					JOptionPane.showMessageDialog(frmWelcome, "Insert proper value 1-99.");
+					executeBtn.setEnabled(false);
+				}else {
+					clsfr.splitObjects(percentage);
+					executeBtn.setEnabled(true);
+				}
+				
+			}catch (Exception e) {
+				JOptionPane.showMessageDialog(frmWelcome, "Insert proper value 1-99.");
+				executeBtn.setEnabled(false);
+			}
+		}else {
+			JOptionPane.showMessageDialog(frmWelcome, "Insert value 1-99.");
+			executeBtn.setEnabled(false);
+		}
+	}
+	
+	private void checkClassifier(ActionEvent e) {
+		clsfr.classificate(percentage, kSelected, classifierSelected);
 	}
 
 	private void sfsClicked(ActionEvent ae) {
@@ -239,7 +270,7 @@ public class SMPD {
 			public void itemStateChanged(ItemEvent ie) {
 				if (ie.getStateChange() == ItemEvent.SELECTED) {
 					classifierSelected = classifier.getSelectedIndex();
-					System.out.println(classifierSelected+" class");
+//					System.out.println(classifierSelected+" class");
 					if (classifierSelected == 1) {
 						k.setEnabled(true);
 						for (int i = 0; i < CONSECUTIVE_K.length; i++) {
@@ -264,7 +295,7 @@ public class SMPD {
 			public void itemStateChanged(ItemEvent ie) {
 				if (ie.getStateChange() == ItemEvent.SELECTED) {
 					kSelected = (int) k.getSelectedItem();
-					System.out.println(kSelected+" k");
+//					System.out.println(kSelected+" k");
 				}
 			}
 		});
@@ -275,6 +306,12 @@ public class SMPD {
 		trainBtn.setHorizontalAlignment(SwingConstants.LEFT);
 		trainBtn.setAlignmentY(0.0f);
 		panel_1.add(trainBtn);
+		trainBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				splitDataset(e);
+			}
+		});
 
 		textArea = new JTextArea(3, 15);
 		panel_1.add(textArea);
@@ -282,7 +319,14 @@ public class SMPD {
 		textArea.setBounds(new Rectangle(0, 0, 150, 50));
 
 		executeBtn = new JButton("C'mon");
+		executeBtn.setEnabled(false);
 		panel_1.add(executeBtn);
+		executeBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				checkClassifier(e);
+			}
+		});
 	}
 
 }
