@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Arrays;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -32,7 +33,7 @@ public class SMPD {
 
 	private final int FISHER_SELECTED = 0;
 	private final int SFS_SELECTED = 1;
-	private final String[] CLASSIFIERS = { "NN", "kNN", "NM", "kNM" };
+	private final String[] CLASSIFIERS = { "NN", "kNN", "NM", "kNM"};
 	private final int[] CONSECUTIVE_K = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
 	private String filePath;
@@ -76,18 +77,6 @@ public class SMPD {
 		}
 	}
 
-	private void chooseFileButtonClickedClassifier(ActionEvent e) {
-
-		openFile();
-		if (loaded) {
-			classifier.setEnabled(true);
-			for (int i = 0; i < CLASSIFIERS.length; i++) {
-				classifier.addItem(CLASSIFIERS[i]);
-			}
-		} else {
-			System.out.println("Something failed while loading file");
-		}
-	}
 
 	private void openFile() {
 
@@ -125,7 +114,7 @@ public class SMPD {
 	}
 	
 	private void checkClassifier(ActionEvent e) {
-		clsfr.classificate(percentage, kSelected, classifierSelected);
+		clsfr.classificate(percentage, kSelected, classifierSelected, bestFeatures);
 	}
 
 	private void sfsClicked(ActionEvent ae) {
@@ -147,6 +136,12 @@ public class SMPD {
 		long startTime = System.currentTimeMillis();
 		bestFeatures=mw.go(dimension, methodSelection, filePath);
 		long finishTime = System.currentTimeMillis();
+		if(bestFeatures.length!=0) {
+			tabbedPane.setEnabledAt(1, true);
+			for (int i = 0; i < CLASSIFIERS.length; i++) {
+				classifier.addItem(CLASSIFIERS[i]);
+			}
+		}
 		System.out.println("Execution time in milisec: " + (finishTime - startTime));
 	}
 
@@ -192,6 +187,7 @@ public class SMPD {
 		panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		tabbedPane.addTab("Fishers", null, panel, null);
+		
 
 		btnSelectFile = new JButton("Select file");
 		btnSelectFile.setVerticalAlignment(SwingConstants.TOP);
@@ -244,19 +240,20 @@ public class SMPD {
 		panel_1 = new JPanel();
 		panel_1.setMaximumSize(new Dimension(150, 150));
 		tabbedPane.addTab("Classifiers", null, panel_1, null);
+		tabbedPane.setEnabledAt(1, false);
 		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
-		selectFileBtn = new JButton("Select file");
-		selectFileBtn.setHorizontalAlignment(SwingConstants.LEFT);
-		selectFileBtn.setVerticalAlignment(SwingConstants.TOP);
-		selectFileBtn.setAlignmentY(0.0f);
-		selectFileBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				chooseFileButtonClickedClassifier(e);
-			}
-		});
-		panel_1.add(selectFileBtn);
+//		selectFileBtn = new JButton("Select file");
+//		selectFileBtn.setHorizontalAlignment(SwingConstants.LEFT);
+//		selectFileBtn.setVerticalAlignment(SwingConstants.TOP);
+//		selectFileBtn.setAlignmentY(0.0f);
+//		selectFileBtn.addActionListener(new ActionListener() {
+//			@Override
+//			public void actionPerformed(ActionEvent e) {
+//				chooseFileButtonClickedClassifier(e);
+//			}
+//		});
+//		panel_1.add(selectFileBtn);
 
 		classifierLbl = new Label("classifier:");
 		panel_1.add(classifierLbl);
@@ -264,7 +261,7 @@ public class SMPD {
 		classifier = new JComboBox();
 		classifier.setToolTipText("Classifier");
 		panel_1.add(classifier);
-		classifier.setEnabled(false);
+		classifier.setEnabled(true);
 		classifier.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent ie) {
@@ -273,8 +270,8 @@ public class SMPD {
 //					System.out.println(classifierSelected+" class");
 					if (classifierSelected == 1 || classifierSelected == 3) {
 						k.setEnabled(true);
-						for (int i = 0; i < CONSECUTIVE_K.length; i++) {
-							k.addItem(CONSECUTIVE_K[i]);
+						for (int i = 1; i <= bestFeatures.length; i++) {
+							k.addItem(i);
 						}
 					} else {
 						k.setSelectedItem(1);

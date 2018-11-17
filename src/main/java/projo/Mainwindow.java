@@ -40,14 +40,21 @@ public class Mainwindow {
 
 		getClassAverages(featureAvgFirstClass, featureAvgSecondClass);
 		getClassStds(featureStdsFirstClass, featureStdsSecondClass);
+
 		if (variant == 0) {
 			if (dimension == 1) {
-				return getFisher();
+				int[] temp = getFisher();
+				System.out.println(Arrays.toString(temp) + " <- Set of best features.");
+				return temp;
 			} else {
-			return discriminantFisher(dimension);
+				int[] temp = discriminantFisher(dimension);
+				System.out.println(Arrays.toString(temp) + " <- Set of best features.");
+				return temp;
 			}
 		} else if (variant == 1) {
-			return sequentialFisher(dimension);
+			int[] temp = sequentialFisher(dimension);
+			System.out.println(Arrays.toString(temp) + " <- Set of best features.");
+			return temp;
 		} else {
 			System.out.println("end");
 		}
@@ -84,7 +91,6 @@ public class Mainwindow {
 		}
 
 		int[] result = Collections.max(fishers.entrySet(), Map.Entry.comparingByValue()).getKey();
-		System.out.println(Arrays.toString(result) + " <- Best set of features.");
 		return result;
 	}
 
@@ -92,7 +98,7 @@ public class Mainwindow {
 
 		List<Integer> features = new ArrayList<>();
 		List<Integer> featureList = new ArrayList<>();
-		// Set<Integer> features = new HashSet<>();
+
 		features.add(getFisher()[0]);
 
 		for (int i = 0; i < dimension - 1; i++) {
@@ -106,7 +112,7 @@ public class Mainwindow {
 				}
 
 				int[] featuresArray = featureList.stream().mapToInt(x -> x).toArray();
-				System.out.println(Arrays.toString(featuresArray));
+//				System.out.println(Arrays.toString(featuresArray));
 				consecutiveFeatures[j] = calculateFisher(featuresArray);
 			}
 			int bestFeatureIndex = getIndexOfLargest(consecutiveFeatures);

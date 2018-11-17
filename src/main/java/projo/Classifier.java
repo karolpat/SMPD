@@ -22,23 +22,23 @@ public class Classifier {
 	private List<Object> firstClassObjects;
 	private List<Object> secondClassObjects;
 
-	public void classificate(int percentage, int k, int classifier) {
+	public void classificate(int percentage, int k, int classifier, int[] features) {
 
 		System.out.println(database.getNoObjects());
 		int correct = 0;
 		if (classifier == 0 || classifier == 1) {
 
 			correct = populateLengthListNeighbour(testListFirstClass, trainingListFirstClass, trainingListSecondClass,
-					correct, k);
+					correct, k, features);
 
 			correct = populateLengthListNeighbour(testListSecondClass, trainingListFirstClass, trainingListSecondClass,
-					correct, k);
+					correct, k, features);
 		} else if (classifier == 2 || classifier == 3) {
 			correct = populateLengthListAverage(testListFirstClass, trainingListFirstClass, trainingListSecondClass,
-					correct, k);
+					correct, k, features);
 
 			correct = populateLengthListAverage(testListSecondClass, trainingListFirstClass, trainingListSecondClass,
-					correct, k);
+					correct, k, features);
 		}
 
 		double correctness = (double) correct / (double) (testListFirstClass.size() + testListSecondClass.size()) * 100;
@@ -87,7 +87,7 @@ public class Classifier {
 	}
 
 	private int populateLengthListNeighbour(List<Object> testList, List<Object> trainingListFirst,
-			List<Object> trainingListSecond, int correct, int k) {
+			List<Object> trainingListSecond, int correct, int k, int[] features) {
 
 		List<Double> distancesFirst;
 		List<Double> distancesSecond;
@@ -108,17 +108,17 @@ public class Classifier {
 			first = 0;
 			second = 0;
 
-			for (int i = 0; i < database.getNoFeatures(); i++) {
+			for (int i = 0; i < features.length; i++) {
 				distancesFirst.add(0d);
 				distancesSecond.add(0d);
 
 				for (Object trainingObject : trainingListFirst) {
 					distancesFirst.add(Math
-							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)), 2));
+							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(features[i])), 2));
 				}
 				for (Object trainingObject : trainingListSecond) {
 					distancesSecond.add(Math
-							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(i)), 2));
+							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(features[i])), 2));
 
 				}
 
@@ -143,12 +143,12 @@ public class Classifier {
 	}
 
 	private int populateLengthListAverage(List<Object> testList, List<Object> trainingListFirst,
-			List<Object> trainingListSecond, int correct, int k) {
+			List<Object> trainingListSecond, int correct, int k, int[] features) {
 
 		List<Double> distancesFirst;
 		List<Double> distancesSecond;
-		Map<Integer, Double> averageMapFirst = getAverages(trainingListFirst);
-		Map<Integer, Double> averageMapSecond = getAverages(trainingListSecond);
+		Map<Integer, Double> averageMapFirst = getAverages(trainingListFirst, features);
+		Map<Integer, Double> averageMapSecond = getAverages(trainingListSecond, features);
 
 		double first;
 		double second;
@@ -166,15 +166,15 @@ public class Classifier {
 			first = 0;
 			second = 0;
 
-			for (int i = 0; i < database.getNoFeatures(); i++) {
+			for (int i = 0; i < features.length; i++) {
 				distancesFirst.add(0d);
 				distancesSecond.add(0d);
 
 				// double objectAverage=0;
 				// objectAverage = (averageMapFirst.get(trainingObject) /
 				// database.getNoFeatures());
-				distancesFirst.add(Math.pow((double) (averageMapFirst.get(i) - testObject.getFetures().get(i)), 2));
-				distancesSecond.add(Math.pow((double) (averageMapSecond.get(i) - testObject.getFetures().get(i)), 2));
+				distancesFirst.add(Math.pow((double) (averageMapFirst.get(features[i]) - testObject.getFetures().get(features[i])), 2));
+				distancesSecond.add(Math.pow((double) (averageMapSecond.get(features[i]) - testObject.getFetures().get(features[i])), 2));
 
 				first = Math.sqrt(distancesFirst.stream().mapToDouble(x -> x.doubleValue()).sum());
 				second = Math.sqrt(distancesSecond.stream().mapToDouble(x -> x.doubleValue()).sum());
@@ -210,19 +210,19 @@ public class Classifier {
 		return list;
 	}
 
-	private Map<Integer, Double> getAverages(List<Object> list) {
+	private Map<Integer, Double> getAverages(List<Object> list, int[] features) {
 
 		Map<Integer, Double> averages = new HashMap<>();
 
-		for (int i = 0; i < database.getNoFeatures(); i++) {
+		for (int i = 0; i < features.length; i++) {
 
 			List<Float> listAvg = new ArrayList<>();
-			averages.put(i, 0d);
+			averages.put(features[i], 0d);
 			for (Object o : list) {
-				listAvg.add(o.getFetures().get(i));
+				listAvg.add(o.getFetures().get(features[i]));
 			}
 			double sum = listAvg.stream().mapToDouble(f -> f.doubleValue()).sum();
-			averages.put(i, sum / list.size());
+			averages.put(features[i], sum / list.size());
 		}
 
 		return averages;
