@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class Object {
 	
 	private String className;
-	private ArrayList<Float> features;
+	private ArrayList<Double> features;
 	
-	public Object(String className, ArrayList<Float> features) {
+	public Object(String className, ArrayList<Double> features) {
 		
 		this.className=className;
 		this.features=features;
@@ -18,7 +18,7 @@ public class Object {
 		return this.className;
 	}
 	
-	ArrayList<Float> getFetures() {
+	ArrayList<Double> getFetures() {
 		return this.features;
 	}
 	

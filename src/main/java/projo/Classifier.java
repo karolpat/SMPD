@@ -114,11 +114,11 @@ public class Classifier {
 
 				for (Object trainingObject : trainingListFirst) {
 					distancesFirst.add(Math
-							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(features[i])), 2));
+							.pow((double) (trainingObject.getFetures().get(features[i]) - testObject.getFetures().get(features[i])), 2));
 				}
 				for (Object trainingObject : trainingListSecond) {
 					distancesSecond.add(Math
-							.pow((double) (trainingObject.getFetures().get(i) - testObject.getFetures().get(features[i])), 2));
+							.pow((double) (trainingObject.getFetures().get(features[i]) - testObject.getFetures().get(features[i])), 2));
 
 				}
 
@@ -216,7 +216,7 @@ public class Classifier {
 
 		for (int i = 0; i < features.length; i++) {
 
-			List<Float> listAvg = new ArrayList<>();
+			List<Double> listAvg = new ArrayList<>();
 			averages.put(features[i], 0d);
 			for (Object o : list) {
 				listAvg.add(o.getFetures().get(features[i]));

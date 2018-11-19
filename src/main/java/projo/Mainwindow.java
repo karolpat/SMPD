@@ -17,14 +17,14 @@ import Jama.Matrix;
 public class Mainwindow {
 
 	Database database = new Database(0, 0, 0);
-	Map<Integer, Float> featureAvgFirstClass = new HashMap<Integer, Float>();
-	Map<Integer, Float> featureAvgSecondClass = new HashMap<Integer, Float>();
+	Map<Integer, Double> featureAvgFirstClass = new HashMap<Integer, Double>();
+	Map<Integer, Double> featureAvgSecondClass = new HashMap<Integer, Double>();
 
-	Map<Integer, Float> featureStdsFirstClass = new HashMap<Integer, Float>();
-	Map<Integer, Float> featureStdsSecondClass = new HashMap<Integer, Float>();
+	Map<Integer, Double> featureStdsFirstClass = new HashMap<Integer, Double>();
+	Map<Integer, Double> featureStdsSecondClass = new HashMap<Integer, Double>();
 
-	Float[][] firstClassArray;
-	Float[][] secondClassArray;
+	Double[][] firstClassArray;
+	Double[][] secondClassArray;
 
 	int[] go(int dimension, int variant, String filePath) {
 
@@ -93,6 +93,7 @@ public class Mainwindow {
 		int[] result = Collections.max(fishers.entrySet(), Map.Entry.comparingByValue()).getKey();
 		return result;
 	}
+	
 
 	private int[] sequentialFisher(int dimension) {
 
@@ -170,21 +171,21 @@ public class Mainwindow {
 		return Math.sqrt(numerator) / det;
 	}
 
-	private void getClassAverages(Map<Integer, Float> featureAvgFirstClass, Map<Integer, Float> featureAvgSecondClass) {
+	private void getClassAverages(Map<Integer, Double> featureAvgFirstClass, Map<Integer, Double> featureAvgSecondClass) {
 
-		float firstAverage = 0;
-		float secondAverage = 0;
+		double firstAverage = 0;
+		double secondAverage = 0;
 
 		for (int i = 0; i < firstClassArray.length; i++) {
 			firstAverage = 0;
 			secondAverage = 0;
-			for (Float f : firstClassArray[i]) {
+			for (Double f : firstClassArray[i]) {
 				firstAverage += f;
 			}
 			firstAverage = firstAverage / firstClassArray[i].length;
 			featureAvgFirstClass.put(i, firstAverage);
 
-			for (Float f : secondClassArray[i]) {
+			for (Double f : secondClassArray[i]) {
 				secondAverage += f;
 			}
 			secondAverage = secondAverage / secondClassArray[i].length;
@@ -192,25 +193,25 @@ public class Mainwindow {
 		}
 	}
 
-	private void getClassStds(Map<Integer, Float> featureStdsFirstClass, Map<Integer, Float> featureStdsSecondClass) {
+	private void getClassStds(Map<Integer, Double> featureStdsFirstClass, Map<Integer, Double> featureStdsSecondClass) {
 
-		float firstStds = 0;
-		float secondStds = 0;
+		double firstStds = 0;
+		double secondStds = 0;
 
 		for (int i = 0; i < firstClassArray.length; i++) {
 			firstStds = 0;
 			secondStds = 0;
-			float temporary = 0;
-			for (Float f : firstClassArray[i]) {
+			double temporary = 0;
+			for (Double f : firstClassArray[i]) {
 				temporary += Math.pow(f - featureAvgFirstClass.get(i), 2);
 			}
-			firstStds = (float) Math.sqrt(temporary / firstClassArray[i].length);
+			firstStds = Math.sqrt(temporary / firstClassArray[i].length);
 			featureStdsFirstClass.put(i, firstStds);
 			temporary = 0;
-			for (Float f : secondClassArray[i]) {
+			for (Double f : secondClassArray[i]) {
 				temporary += Math.pow(f - featureAvgSecondClass.get(i), 2);
 			}
-			secondStds = (float) Math.sqrt(temporary / secondClassArray[i].length);
+			secondStds = Math.sqrt(temporary / secondClassArray[i].length);
 			featureStdsSecondClass.put(i, secondStds);
 		}
 	}

@@ -19,8 +19,8 @@ public class Database {
 	private List<Object> firstClassObjects = new ArrayList<Object>();
 	private List<Object> secondClassObjects = new ArrayList<Object>();
 
-	private Float[][] firstClassArray;
-	private Float[][] secondClassArray;
+	private Double[][] firstClassArray;
+	private Double[][] secondClassArray;
 
 	private int noClass = 0;
 	private int noObjects = 0;
@@ -39,11 +39,11 @@ public class Database {
 		String secondClass = null;
 		for (Map.Entry<String, Integer> entry : classCounter.entrySet()) {
 			if (index == 0) {
-				firstClassArray = new Float[featuresIDs.size()][entry.getValue()];
+				firstClassArray = new Double[featuresIDs.size()][entry.getValue()];
 				index++;
 				firstClass = entry.getKey();
 			} else {
-				secondClassArray = new Float[featuresIDs.size()][entry.getValue()];
+				secondClassArray = new Double[featuresIDs.size()][entry.getValue()];
 				secondClass = entry.getKey();
 			}
 		}
@@ -135,7 +135,7 @@ public class Database {
 				return false;
 			}
 
-			ArrayList<Float> featuresValues = new ArrayList<Float>();
+			ArrayList<Double> featuresValues = new ArrayList<Double>();
 			String className = null;
 
 			while (sc.hasNextLine()) {
@@ -144,11 +144,11 @@ public class Database {
 
 				className = nextLine.get(0);
 
-				featuresValues = new ArrayList<Float>();
+				featuresValues = new ArrayList<Double>();
 				nextLine = Arrays.asList(currentLine.split(","));
 
 				for (int i = 1; i < nextLine.size(); i++) {
-					featuresValues.add(Float.parseFloat(nextLine.get(i)));
+					featuresValues.add(Double.parseDouble(nextLine.get(i)));
 				}
 
 				// for (int i = 0; i < featuresValues.size(); i++) {
@@ -235,11 +235,11 @@ public class Database {
 		return classNamesList;
 	}
 
-	public Float[][] getFirstClassArray() {
+	public Double[][] getFirstClassArray() {
 		return firstClassArray;
 	}
 
-	public Float[][] getSecondClassArray() {
+	public Double[][] getSecondClassArray() {
 		return secondClassArray;
 	}
 
